@@ -317,6 +317,18 @@
                     </div>
                 </div>
                 
+                <!-- AI API Key Settings -->
+                <div class="bg-white rounded-2xl shadow-md p-6 mb-8 flex items-center justify-between border-2 border-violet-100">
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-robot text-violet-500"></i> إعدادات الذكاء الاصطناعي (AI)</h3>
+                        <p class="text-sm text-slate-500">ضع مفتاح Google Gemini API لتفعيل الميزات الذكية.</p>
+                    </div>
+                    <div class="flex items-center gap-2 w-1/2">
+                        <input type="password" id="settings-api-key" placeholder="ألصق مفتاح API Key هنا..." class="flex-1 border rounded p-2 text-left text-sm" >
+                        <button onclick="saveApiKey()" class="bg-violet-600 text-white px-4 py-2 rounded hover:bg-violet-700 font-bold text-sm">حفظ المفتاح</button>
+                    </div>
+                </div>
+
                 <!-- Table Settings -->
                 <div class="bg-white rounded-2xl shadow-md p-6 mb-8 flex items-center justify-between">
                     <div>
@@ -516,7 +528,7 @@
 
     <script>
         // --- CONFIG ---
-        const apiKey = ""; 
+        let apiKey = ""; 
 
         // --- DATA ---
         let tablesCount = 6;
@@ -551,12 +563,41 @@
         let currentPayOrderId = null;
         const VAT_RATE = 0.15;
 
+        // --- LOCAL STORAGE (Persistence) ---
+        function saveData() {
+            localStorage.setItem('hekaya_orders', JSON.stringify(systemOrders));
+            localStorage.setItem('hekaya_menu', JSON.stringify(menuItems));
+            localStorage.setItem('hekaya_tables', tablesCount);
+            localStorage.setItem('hekaya_api_key', apiKey);
+        }
+
+        function loadData() {
+            const savedOrders = localStorage.getItem('hekaya_orders');
+            if (savedOrders) systemOrders = JSON.parse(savedOrders);
+
+            const savedMenu = localStorage.getItem('hekaya_menu');
+            if (savedMenu) menuItems = JSON.parse(savedMenu);
+
+            const savedTables = localStorage.getItem('hekaya_tables');
+            if (savedTables) tablesCount = parseInt(savedTables);
+
+            const savedKey = localStorage.getItem('hekaya_api_key');
+            if (savedKey) apiKey = savedKey;
+        }
+
         // --- INIT ---
         document.addEventListener('DOMContentLoaded', () => {
+            loadData(); // Load data on startup
             renderMenu('all');
             renderAdminTable();
-            initTables(); // Init tables selects
+            initTables(); 
             document.getElementById('settings-table-count').value = tablesCount;
+            document.getElementById('settings-api-key').value = apiKey;
+            // Re-render views based on loaded data
+            renderSystemOrders();
+            renderDeliveryOrders();
+            renderTransactions();
+            renderReports();
         });
 
         // --- TABLE MANAGEMENT ---
@@ -575,8 +616,20 @@
             const count = parseInt(document.getElementById('settings-table-count').value);
             if(count && count > 0) {
                 tablesCount = count;
+                saveData(); // Save changes
                 initTables();
                 showNotification('تم تحديث عدد الطاولات');
+            }
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('settings-api-key').value;
+            if(key) {
+                apiKey = key;
+                saveData();
+                showNotification('تم حفظ مفتاح الذكاء الاصطناعي');
+            } else {
+                showNotification('المفتاح فارغ', 'error');
             }
         }
 
@@ -771,6 +824,7 @@
             }
 
             systemOrders.unshift(order);
+            saveData(); // Save new order
             cart = [];
             renderCart();
             showNotification('تم إرسال الطلب بنجاح');
@@ -783,7 +837,6 @@
         }
 
         // --- SYSTEM & DELIVERY & TRANSACTIONS & REPORTS ---
-        // (Similar to previous implementation, condensed for brevity where unchanged)
         function renderSystemOrders() {
             const container = document.getElementById('orders-container');
             const noMsg = document.getElementById('no-orders-msg');
@@ -821,7 +874,15 @@
             div.innerHTML = `<div class="flex justify-between font-bold text-slate-700 mb-1"><span>${order.customer.name}</span><span>#${order.id.toString().slice(-4)}</span></div><div class="text-xs text-slate-500 mb-2"><i class="fas fa-phone"></i> ${order.customer.phone}<br><i class="fas fa-map-marker-alt"></i> ${order.customer.address}</div><div class="font-bold text-slate-800 text-right">${order.finalTotal.toFixed(2)} ر.س</div>${btnAction}<div class="mt-2 flex gap-1"><button onclick="printInvoice(${order.id})" class="flex-1 bg-white border text-xs py-1 rounded hover:bg-slate-100">فاتورة</button>${order.status !== 'paid' ? `<button onclick="openPaymentModal(${order.id})" class="flex-1 bg-sky-100 text-sky-700 text-xs py-1 rounded hover:bg-sky-200">دفع</button>` : '<span class="flex-1 text-center text-xs text-green-600 font-bold py-1">مدفوع</span>'}</div>`;
             return div;
         }
-        function updateDeliveryStatus(id, status) { const o = systemOrders.find(x => x.id === id); if(o) { o.deliveryStatus = status; renderDeliveryOrders(); showNotification('تم التحديث'); } }
+        function updateDeliveryStatus(id, status) { 
+            const o = systemOrders.find(x => x.id === id); 
+            if(o) { 
+                o.deliveryStatus = status; 
+                saveData(); // Save status change
+                renderDeliveryOrders(); 
+                showNotification('تم التحديث'); 
+            } 
+        }
 
         function renderTransactions() {
             const tbody = document.getElementById('transactions-table-body');
@@ -831,7 +892,18 @@
                 tbody.innerHTML += `<tr class="bg-white border-b hover:bg-slate-50 ${o.isCancelled ? 'opacity-50' : ''}"><td class="px-6 py-4 font-bold">#${o.id.toString().slice(-4)}</td><td class="px-6 py-4">${o.type === 'delivery' ? 'دليفري' : `طاولة ${o.table}`}</td><td class="px-6 py-4">${o.time}</td><td class="px-6 py-4 font-bold">${o.finalTotal.toFixed(2)}</td><td class="px-6 py-4">${statusHtml}</td><td class="px-6 py-4 text-center">${!o.isCancelled ? `<button onclick="cancelOrder(${o.id})" class="text-red-500 hover:text-red-700 font-bold text-xs border border-red-200 px-3 py-1 rounded hover:bg-red-50">إلغاء (Void)</button>` : '-'}</td></tr>`;
             });
         }
-        function cancelOrder(id) { if(confirm('إلغاء الفاتورة؟')) { const o = systemOrders.find(x => x.id === id); if(o) { o.isCancelled = true; o.status = 'cancelled'; renderTransactions(); showNotification('تم الإلغاء', 'error'); } } }
+        function cancelOrder(id) { 
+            if(confirm('إلغاء الفاتورة؟')) { 
+                const o = systemOrders.find(x => x.id === id); 
+                if(o) { 
+                    o.isCancelled = true; 
+                    o.status = 'cancelled'; 
+                    saveData(); // Save cancellation
+                    renderTransactions(); 
+                    showNotification('تم الإلغاء', 'error'); 
+                } 
+            } 
+        }
 
         function renderReports() {
             const valid = systemOrders.filter(o => !o.isCancelled);
@@ -891,6 +963,7 @@
             if(o) {
                 o.status = 'paid';
                 o.finalTotal = parseFloat(document.getElementById('pay-final-total').innerText);
+                saveData(); // Save payment status
                 showNotification(`تم الدفع: ${method}`);
                 closeModal('payment-modal');
                 if(!document.getElementById('system-view').classList.contains('hidden')) renderSystemOrders();
@@ -915,8 +988,22 @@
                 `;
             });
         }
-        function updatePrice(id, p) { const i = menuItems.find(x => x.id === id); if(i) { i.price = parseFloat(p); showNotification('تم التحديث'); } }
-        function toggleStock(id) { const i = menuItems.find(x => x.id === id); if(i) { i.inStock = !i.inStock; showNotification('تم تغيير الحالة'); } }
+        function updatePrice(id, p) { 
+            const i = menuItems.find(x => x.id === id); 
+            if(i) { 
+                i.price = parseFloat(p); 
+                saveData(); // Save price change
+                showNotification('تم التحديث'); 
+            } 
+        }
+        function toggleStock(id) { 
+            const i = menuItems.find(x => x.id === id); 
+            if(i) { 
+                i.inStock = !i.inStock; 
+                saveData(); // Save stock change
+                showNotification('تم تغيير الحالة'); 
+            } 
+        }
 
         // --- ADD ITEM LOGIC ---
         function openAddItemModal() {
@@ -949,6 +1036,7 @@
             };
 
             menuItems.push(newItem);
+            saveData(); // Save new item
             renderMenu('all'); // Update waiter view
             renderAdminTable(); // Update admin view
             closeModal('add-item-modal');
@@ -957,6 +1045,10 @@
 
         // --- AI ---
         async function callGemini(promptText) {
+            if(!apiKey) {
+                alert('عذراً، يجب إعداد مفتاح API Key الخاص بالذكاء الاصطناعي من شاشة "البيانات" أولاً.');
+                return null;
+            }
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -964,7 +1056,10 @@
                 });
                 const data = await response.json();
                 return data.candidates[0].content.parts[0].text;
-            } catch (error) { return null; }
+            } catch (error) { 
+                console.error(error);
+                return null; 
+            }
         }
         async function getSmartSuggestions() {
             if (cart.length === 0) return showNotification('أضف عناصر أولاً', 'error');
@@ -979,7 +1074,7 @@
                     suggs.forEach(s => { const i = menuItems.find(x=>x.id===s.id); if(i) h+=`<div class="bg-violet-50 p-3 rounded flex justify-between items-center"><div><h4 class="font-bold">${i.name}</h4><p class="text-xs text-slate-500">${s.reason}</p></div><button onclick="addToCartById(${i.id});closeAiModal()" class="bg-violet-600 text-white text-xs px-3 py-1 rounded">إضافة</button></div>`; });
                     c.innerHTML = h + '</div>';
                 } catch(e) { c.innerText = 'خطأ في التحليل'; }
-            } else c.innerText = 'تعذر الاتصال';
+            } else c.innerHTML = '<div class="text-center text-red-500 p-4">تعذر الاتصال بالذكاء الاصطناعي.<br>تأكد من صحة المفتاح في الإعدادات.</div>';
         }
         async function generateMarketingPost() {
             const m = document.getElementById('marketing-modal'), c = document.getElementById('marketing-content');
@@ -987,7 +1082,11 @@
             c.innerHTML = '<div class="flex justify-center h-32 items-center"><div class="ai-spinner border-indigo-500 border-t-transparent"></div></div>';
             const i = menuItems[Math.floor(Math.random()*menuItems.length)];
             const res = await callGemini(`Write Arabic social post for ${i.name} at ${i.price} SAR.`);
-            c.innerHTML = `<div class="bg-white p-4 rounded text-right">${res||'Error'}</div>`;
+            if(res) {
+                c.innerHTML = `<div class="bg-white p-4 rounded text-right">${res}</div>`;
+            } else {
+                c.innerHTML = '<div class="text-center text-red-500 p-4">تعذر الاتصال بالذكاء الاصطناعي.<br>تأكد من صحة المفتاح في الإعدادات.</div>';
+            }
         }
         function addToCartById(id) { const i = menuItems.find(x => x.id === id); if(i) { if(i.type==='weight') openCustomModal(i); else addToCart(i, 1); } }
         function closeAiModal() { document.getElementById('ai-modal').classList.add('hidden'); }
