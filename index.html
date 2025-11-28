@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام مطعم حكاية | Hekaya POS</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f3f4f6;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        .category-btn.active {
+            background-color: #0ea5e9; /* Sky 500 */
+            color: white;
+            border-color: #0ea5e9;
+        }
+
+        .item-card:active {
+            transform: scale(0.95);
+        }
+
+        /* Animation for new orders */
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .new-order {
+            animation: slideIn 0.4s ease-out forwards;
+        }
+
+        /* --- PRINT STYLES --- */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto;
+                background: white;
+                direction: rtl;
+                padding: 0;
+                margin: 0;
+            }
+            /* Reset typical web styles for print */
+            body {
+                height: auto;
+                overflow: visible;
+                background: white;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <!-- Top Navigation / Role Switcher -->
+    <nav class="bg-slate-900 text-white p-3 shadow-lg z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-fish text-3xl text-sky-400"></i>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">مطعم حكاية</h1>
+                    <p class="text-xs text-slate-400">أشهى المأكولات البحرية</p>
+                </div>
+            </div>
+            
+            <!-- View Switcher Tabs -->
+            <div class="flex bg-slate-800 rounded-lg p-1">
+                <button onclick="switchView('waiter')" id="btn-waiter" class="px-6 py-2 rounded-md text-sm font-bold transition-colors bg-sky-500 text-white shadow">
+                    <i class="fas fa-tablet-alt ml-2"></i> تابلت النادل
+                </button>
+                <button onclick="switchView('system')" id="btn-system" class="px-6 py-2 rounded-md text-sm font-bold transition-colors text-slate-300 hover:text-white hover:bg-slate-700">
+                    <i class="fas fa-desktop ml-2"></i> شاشة النظام
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-hidden relative">
+
+        <!-- ================= WAITER VIEW (TABLET) ================= -->
+        <div id="waiter-view" class="absolute inset-0 flex flex-col transition-opacity duration-300">
+            
+            <!-- Header: Table Selection -->
+            <div class="bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center shadow-sm">
+                <div class="flex items-center gap-4">
+                    <span class="text-gray-600 font-semibold">رقم الطاولة الحالية:</span>
+                    <select id="table-select" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-32 p-2.5">
+                        <option value="1">طاولة 1</option>
+                        <option value="2">طاولة 2</option>
+                        <option value="3">طاولة 3</option>
+                        <option value="4">طاولة 4</option>
+                        <option value="5">طاولة 5</option>
+                        <option value="6">طاولة 6 (VIP)</option>
+                    </select>
+                </div>
+                <div class="text-sky-600 font-bold">
+                    <i class="fas fa-user-tie ml-1"></i> ويتر: أحمد
+                </div>
+            </div>
+
+            <div class="flex flex-1 overflow-hidden">
+                <!-- Menu Section -->
+                <div class="flex-1 flex flex-col bg-gray-50 border-l border-gray-200">
+                    <!-- Categories -->
+                    <div class="p-3 bg-white shadow-sm flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
+                        <button onclick="filterMenu('all')" class="category-btn active px-4 py-2 rounded-full border border-gray-200 text-gray-600 font-semibold hover:bg-gray-100 transition">الكل</button>
+                        <button onclick="filterMenu('fish')" class="category-btn px-4 py-2 rounded-full border border-gray-200 text-gray-600 font-semibold hover:bg-gray-100 transition">أسماك طازجة</button>
+                        <button onclick="filterMenu('shrimp')" class="category-btn px-4 py-2 rounded-full border border-gray-200 text-gray-600 font-semibold hover:bg-gray-100 transition">جمبري واستاكوزا</button>
+                        <button onclick="filterMenu('sides')" class="category-btn px-4 py-2 rounded-full border border-gray-200 text-gray-600 font-semibold hover:bg-gray-100 transition">أطباق جانبية</button>
+                        <button onclick="filterMenu('drinks')" class="category-btn px-4 py-2 rounded-full border border-gray-200 text-gray-600 font-semibold hover:bg-gray-100 transition">مشروبات</button>
+                    </div>
+
+                    <!-- Items Grid -->
+                    <div id="menu-grid" class="p-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto">
+                        <!-- Items will be injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Current Order Cart (Right Panel) -->
+                <div class="w-96 bg-white flex flex-col shadow-2xl z-10">
+                    <div class="p-4 bg-sky-50 border-b border-sky-100">
+                        <h2 class="font-bold text-lg text-sky-800"><i class="fas fa-receipt ml-2"></i>الطلب الحالي</h2>
+                    </div>
+                    
+                    <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-3">
+                        <!-- Cart Items -->
+                        <div class="text-center text-gray-400 mt-10">
+                            <i class="fas fa-basket-shopping text-4xl mb-3 opacity-30"></i>
+                            <p>لا يوجد عناصر في الطلب</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 border-t border-gray-200">
+                        <div class="flex justify-between items-center mb-4 text-lg font-bold text-gray-800">
+                            <span>الإجمالي:</span>
+                            <span id="cart-total">0.00 ر.س</span>
+                        </div>
+                        <button onclick="submitOrder()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-md transition transform hover:-translate-y-1 active:translate-y-0 flex justify-center items-center gap-2">
+                            <i class="fas fa-paper-plane"></i> إرسال للمطبخ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SYSTEM VIEW (KITCHEN/MANAGER) ================= -->
+        <div id="system-view" class="absolute inset-0 flex flex-col bg-slate-100 hidden opacity-0 transition-opacity duration-300">
+            <div class="p-5 flex-1 overflow-y-auto">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">الطلبات الواردة</h2>
+                        <p class="text-slate-500">نظام إدارة المطبخ والكاشير - بث مباشر</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="bg-white px-4 py-2 rounded shadow text-center">
+                            <div class="text-xs text-gray-500">إجمالي الطلبات</div>
+                            <div id="stats-count" class="font-bold text-xl text-sky-600">0</div>
+                        </div>
+                        <div class="bg-white px-4 py-2 rounded shadow text-center">
+                            <div class="text-xs text-gray-500">الإيرادات</div>
+                            <div id="stats-revenue" class="font-bold text-xl text-green-600">0 ر.س</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wrapper for Message and Grid -->
+                <div class="relative">
+                    <!-- No Orders Message -->
+                    <div id="no-orders-msg" class="flex flex-col items-center justify-center h-64 text-gray-400">
+                        <i class="fas fa-clipboard-check text-6xl mb-4 opacity-20"></i>
+                        <p class="text-lg">لا توجد طلبات نشطة حالياً</p>
+                        <p class="text-sm">الطلبات المرسلة من التابلت ستظهر هنا</p>
+                    </div>
+
+                    <!-- Orders Grid -->
+                    <div id="orders-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Orders will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- PRINT AREA (Invisible normally, visible during print) -->
+    <div id="print-area" class="hidden"></div>
+
+    <!-- Modals or Notifications -->
+    <div id="notification" class="fixed bottom-4 left-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 transition-transform duration-300 z-50 flex items-center gap-3">
+        <i class="fas fa-check-circle text-green-400"></i>
+        <span id="notif-text">تمت العملية بنجاح</span>
+    </div>
+
+    <!-- Javascript Logic -->
+    <script>
+        // --- DATA ---
+        const menuItems = [
+            { id: 1, name: "جمبري جامبو مشوي", price: 65, category: "shrimp", icon: "fa-shrimp", color: "text-orange-500" },
+            { id: 2, name: "استاكوزا بالزبدة", price: 120, category: "shrimp", icon: "fa-spider", color: "text-red-600" },
+            { id: 3, name: "سمك دنيس زيت وليمون", price: 55, category: "fish", icon: "fa-fish", color: "text-blue-500" },
+            { id: 4, name: "سمك قاروص سنجاري", price: 70, category: "fish", icon: "fa-fish", color: "text-blue-600" },
+            { id: 5, name: "سمك فيليه مقلي", price: 45, category: "fish", icon: "fa-utensils", color: "text-yellow-600" },
+            { id: 6, name: "طاجن سي فود", price: 60, category: "fish", icon: "fa-bowl-food", color: "text-orange-700" },
+            { id: 7, name: "كابوريا مشوية", price: 50, category: "shrimp", icon: "fa-certificate", color: "text-red-500" },
+            { id: 8, name: "أرز صيادية", price: 15, category: "sides", icon: "fa-bowl-rice", color: "text-amber-700" },
+            { id: 9, name: "سلطة طحينة", price: 8, category: "sides", icon: "fa-lemon", color: "text-yellow-500" },
+            { id: 10, name: "شوربة سي فود مخلية", price: 35, category: "shrimp", icon: "fa-mug-hot", color: "text-orange-400" },
+            { id: 11, name: "بيبسي", price: 5, category: "drinks", icon: "fa-bottle-water", color: "text-blue-800" },
+            { id: 12, name: "عصير ليمون نعناع", price: 12, category: "drinks", icon: "fa-glass-water", color: "text-green-500" }
+        ];
+
+        let cart = [];
+        let systemOrders = []; 
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMenu('all');
+        });
+
+        // --- VIEW SWITCHING ---
+        function switchView(viewName) {
+            const waiterView = document.getElementById('waiter-view');
+            const systemView = document.getElementById('system-view');
+            const btnWaiter = document.getElementById('btn-waiter');
+            const btnSystem = document.getElementById('btn-system');
+
+            if (viewName === 'waiter') {
+                waiterView.classList.remove('hidden');
+                setTimeout(() => waiterView.classList.remove('opacity-0'), 50); 
+                systemView.classList.add('opacity-0');
+                setTimeout(() => systemView.classList.add('hidden'), 300);
+
+                btnWaiter.classList.add('bg-sky-500', 'text-white', 'shadow');
+                btnWaiter.classList.remove('text-slate-300', 'hover:text-white', 'hover:bg-slate-700');
+                btnSystem.classList.remove('bg-sky-500', 'text-white', 'shadow');
+                btnSystem.classList.add('text-slate-300', 'hover:text-white', 'hover:bg-slate-700');
+
+            } else {
+                systemView.classList.remove('hidden');
+                setTimeout(() => systemView.classList.remove('opacity-0'), 50);
+                waiterView.classList.add('opacity-0');
+                setTimeout(() => waiterView.classList.add('hidden'), 300);
+
+                btnSystem.classList.add('bg-sky-500', 'text-white', 'shadow');
+                btnSystem.classList.remove('text-slate-300', 'hover:text-white', 'hover:bg-slate-700');
+                btnWaiter.classList.remove('bg-sky-500', 'text-white', 'shadow');
+                btnWaiter.classList.add('text-slate-300', 'hover:text-white', 'hover:bg-slate-700');
+                
+                renderSystemOrders();
+            }
+        }
+
+        // --- WAITER LOGIC ---
+        function filterMenu(category) {
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active', 'bg-sky-500', 'text-white', 'border-sky-500'));
+            event.target.classList.add('active', 'bg-sky-500', 'text-white', 'border-sky-500'); 
+            renderMenu(category);
+        }
+
+        function renderMenu(category) {
+            const grid = document.getElementById('menu-grid');
+            grid.innerHTML = '';
+
+            const filtered = category === 'all' ? menuItems : menuItems.filter(i => i.category === category);
+
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'item-card bg-white p-4 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:shadow-md flex flex-col items-center text-center h-full justify-between';
+                div.onclick = () => addToCart(item);
+                div.innerHTML = `
+                    <div class="mb-3 text-4xl ${item.color}"><i class="fas ${item.icon}"></i></div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm mb-1">${item.name}</h3>
+                        <span class="text-sky-600 font-bold bg-sky-50 px-2 py-1 rounded-md text-xs">${item.price} ر.س</span>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function addToCart(item) {
+            const existing = cart.find(c => c.id === item.id);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...item, qty: 1 });
+            }
+            renderCart();
+            // Optional: play sound
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(c => c.id !== id);
+            renderCart();
+        }
+
+        function adjustQty(id, change) {
+            const item = cart.find(c => c.id === id);
+            if (item) {
+                item.qty += change;
+                if (item.qty <= 0) removeFromCart(id);
+                else renderCart();
+            }
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items');
+            const totalEl = document.getElementById('cart-total');
+            container.innerHTML = '';
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-400 mt-10">
+                        <i class="fas fa-basket-shopping text-4xl mb-3 opacity-30"></i>
+                        <p>لا يوجد عناصر في الطلب</p>
+                    </div>`;
+                totalEl.innerText = '0.00 ر.س';
+                return;
+            }
+
+            let total = 0;
+            cart.forEach(item => {
+                const itemTotal = item.price * item.qty;
+                total += itemTotal;
+                
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center bg-white p-2 rounded-lg border border-gray-100 shadow-sm';
+                div.innerHTML = `
+                    <div class="flex-1">
+                        <div class="font-bold text-sm text-gray-800">${item.name}</div>
+                        <div class="text-xs text-gray-500">${item.price} ر.س</div>
+                    </div>
+                    <div class="flex items-center gap-2 bg-gray-100 rounded-lg px-1">
+                        <button onclick="adjustQty(${item.id}, -1)" class="w-6 h-6 flex items-center justify-center text-red-500 font-bold hover:bg-gray-200 rounded">-</button>
+                        <span class="text-sm font-bold w-4 text-center">${item.qty}</span>
+                        <button onclick="adjustQty(${item.id}, 1)" class="w-6 h-6 flex items-center justify-center text-green-500 font-bold hover:bg-gray-200 rounded">+</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            totalEl.innerText = total.toFixed(2) + ' ر.س';
+        }
+
+        function submitOrder() {
+            if (cart.length === 0) {
+                showNotification('السلة فارغة!', 'error');
+                return;
+            }
+
+            const tableNum = document.getElementById('table-select').value;
+            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            
+            const order = {
+                id: Date.now(),
+                table: tableNum,
+                items: [...cart],
+                total: total,
+                time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
+                status: 'pending'
+            };
+
+            systemOrders.unshift(order);
+            
+            cart = [];
+            renderCart();
+            showNotification('تم إرسال الطلب للمطبخ بنجاح');
+        }
+
+
+        // --- SYSTEM LOGIC ---
+        function renderSystemOrders() {
+            const container = document.getElementById('orders-container');
+            const noOrdersMsg = document.getElementById('no-orders-msg');
+            const countEl = document.getElementById('stats-count');
+            const revEl = document.getElementById('stats-revenue');
+
+            container.innerHTML = '';
+            
+            countEl.innerText = systemOrders.length;
+            const totalRev = systemOrders.reduce((sum, o) => sum + o.total, 0);
+            revEl.innerText = totalRev.toLocaleString() + ' ر.س';
+
+            if (systemOrders.length === 0) {
+                noOrdersMsg.classList.remove('hidden');
+                return;
+            } else {
+                noOrdersMsg.classList.add('hidden');
+            }
+
+            systemOrders.forEach(order => {
+                const card = document.createElement('div');
+                card.className = 'new-order bg-white rounded-xl shadow border-r-4 border-sky-500 overflow-hidden flex flex-col';
+                
+                let itemsHtml = '';
+                order.items.forEach(item => {
+                    itemsHtml += `
+                        <div class="flex justify-between border-b border-gray-50 py-2 last:border-0">
+                            <span class="text-gray-700 font-semibold text-sm">${item.qty}x ${item.name}</span>
+                            <span class="text-gray-400 text-xs">${(item.price * item.qty)} ر.س</span>
+                        </div>
+                    `;
+                });
+
+                let statusBadge = '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">انتظار</span>';
+                
+                // We add Print buttons here
+                card.innerHTML = `
+                    <div class="bg-gray-50 p-3 flex justify-between items-center border-b border-gray-100">
+                        <div class="flex items-center gap-2">
+                            <div class="bg-sky-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">${order.table}</div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-sm">طاولة ${order.table}</h3>
+                                <p class="text-xs text-gray-500">الطلب #${order.id.toString().slice(-4)} | ${order.time}</p>
+                            </div>
+                        </div>
+                        ${statusBadge}
+                    </div>
+                    <div class="p-4 flex-1 overflow-y-auto max-h-40 scrollbar-hide">
+                        ${itemsHtml}
+                    </div>
+                    <!-- Action Buttons -->
+                    <div class="p-2 bg-gray-50 flex gap-2 border-t border-gray-100">
+                        <button onclick="printKitchenTicket(${order.id})" class="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-2 py-1 rounded text-xs font-semibold shadow-sm transition">
+                            <i class="fas fa-print ml-1 text-orange-500"></i> مطبخ
+                        </button>
+                        <button onclick="printInvoice(${order.id})" class="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-2 py-1 rounded text-xs font-semibold shadow-sm transition">
+                            <i class="fas fa-file-invoice-dollar ml-1 text-green-600"></i> فاتورة
+                        </button>
+                    </div>
+                    <div class="bg-gray-800 text-white p-3 flex justify-between items-center text-sm">
+                        <span>الإجمالي: <span class="font-bold text-sky-300 text-lg">${order.total} ر.س</span></span>
+                        <button onclick="completeOrder(this)" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs transition">تجهيز</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function completeOrder(btn) {
+            btn.innerText = 'تم التجهيز';
+            btn.className = "bg-gray-500 text-white px-3 py-1 rounded text-xs cursor-default";
+            btn.parentElement.previousElementSibling.previousElementSibling.previousElementSibling.querySelector('span').className = "bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold";
+            btn.parentElement.previousElementSibling.previousElementSibling.previousElementSibling.querySelector('span').innerText = "جاهز للتقديم";
+        }
+
+        // --- PRINT FUNCTIONS ---
+        
+        // 1. Kitchen Ticket (Tries to be compact, high contrast, big text)
+        function printKitchenTicket(orderId) {
+            const order = systemOrders.find(o => o.id === orderId);
+            if (!order) return;
+
+            let itemsHtml = '';
+            order.items.forEach(item => {
+                itemsHtml += `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 5px;">
+                        <span style="font-weight: 900; font-size: 18px;">${item.name}</span>
+                        <span style="font-weight: 900; font-size: 20px;">x${item.qty}</span>
+                    </div>
+                `;
+            });
+
+            const ticketHtml = `
+                <div style="width: 300px; margin: 20px auto; padding: 10px; border: 1px solid #000; font-family: 'Courier New', monospace; text-align: center;">
+                    <h2 style="margin: 0; font-size: 24px; font-weight: bold;">مطبخ - مطعم حكاية</h2>
+                    <p style="margin: 5px 0 15px;">وقت الطلب: ${order.time}</p>
+                    
+                    <div style="border: 2px solid #000; padding: 10px; margin: 10px 0;">
+                        <span style="font-size: 16px;">طاولة رقم</span>
+                        <h1 style="font-size: 60px; margin: 0; line-height: 1;">${order.table}</h1>
+                    </div>
+                    
+                    <div style="text-align: right; margin-top: 20px;">
+                        ${itemsHtml}
+                    </div>
+                    
+                    <div style="margin-top: 20px; font-size: 12px; border-top: 1px solid #000; padding-top: 5px;">
+                        رقم الطلب: #${order.id.toString().slice(-4)}
+                    </div>
+                </div>
+            `;
+
+            const printArea = document.getElementById('print-area');
+            printArea.innerHTML = ticketHtml;
+            window.print();
+        }
+
+        // 2. Customer Invoice (Formal, Tax info, Totals)
+        function printInvoice(orderId) {
+            const order = systemOrders.find(o => o.id === orderId);
+            if (!order) return;
+
+            // Calculations
+            const subtotal = order.total / 1.15; // Assuming total includes 15% VAT
+            const tax = order.total - subtotal;
+
+            let itemsHtml = '';
+            order.items.forEach(item => {
+                itemsHtml += `
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 8px 0; text-align: right;">${item.name}</td>
+                        <td style="padding: 8px 0; text-align: center;">${item.qty}</td>
+                        <td style="padding: 8px 0; text-align: left;">${item.price}</td>
+                        <td style="padding: 8px 0; text-align: left;">${(item.price * item.qty).toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            const invoiceHtml = `
+                <div style="width: 350px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; font-family: 'Cairo', sans-serif;">
+                    
+                    <!-- Header -->
+                    <div style="text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 15px; margin-bottom: 15px;">
+                        <h1 style="margin: 0; color: #0284c7; font-size: 24px;">مطعم حكاية</h1>
+                        <p style="margin: 5px 0; color: #666; font-size: 12px;">أشهى المأكولات البحرية الطازجة</p>
+                        <p style="margin: 5px 0; font-size: 12px;">الرقم الضريبي: 300012345678903</p>
+                        <p style="margin: 5px 0; font-size: 12px;">تاريخ: ${new Date().toLocaleDateString()} | وقت: ${order.time}</p>
+                    </div>
+
+                    <!-- Order Info -->
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; font-size: 14px;">
+                        <span>رقم الطلب: #${order.id.toString().slice(-4)}</span>
+                        <span>طاولة: ${order.table}</span>
+                    </div>
+
+                    <!-- Items Table -->
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #000;">
+                                <th style="text-align: right; padding-bottom: 5px;">الصنف</th>
+                                <th style="text-align: center; padding-bottom: 5px;">الكمية</th>
+                                <th style="text-align: left; padding-bottom: 5px;">سعر</th>
+                                <th style="text-align: left; padding-bottom: 5px;">إجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHtml}
+                        </tbody>
+                    </table>
+
+                    <!-- Totals -->
+                    <div style="border-top: 2px dashed #ccc; padding-top: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px;">
+                            <span>المجموع (غير شامل):</span>
+                            <span>${subtotal.toFixed(2)}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px;">
+                            <span>ضريبة القيمة المضافة (15%):</span>
+                            <span>${tax.toFixed(2)}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 18px; font-weight: bold;">
+                            <span>الإجمالي النهائي:</span>
+                            <span>${order.total.toFixed(2)} ر.س</span>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="text-align: center; margin-top: 30px; font-size: 11px; color: #888;">
+                        <p>شكراً لزيارتكم مطعم حكاية</p>
+                        <p>نتمنى لكم يوماً سعيداً</p>
+                        <div style="margin-top: 10px;">
+                            *****
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const printArea = document.getElementById('print-area');
+            printArea.innerHTML = invoiceHtml;
+            window.print();
+        }
+
+        function showNotification(msg, type = 'success') {
+            const el = document.getElementById('notification');
+            const textEl = document.getElementById('notif-text');
+            const icon = el.querySelector('i');
+
+            textEl.innerText = msg;
+            
+            if (type === 'error') {
+                icon.className = 'fas fa-exclamation-circle text-red-400';
+            } else {
+                icon.className = 'fas fa-check-circle text-green-400';
+            }
+
+            el.classList.remove('translate-y-20');
+            setTimeout(() => {
+                el.classList.add('translate-y-20');
+            }, 3000);
+        }
+
+    </script>
+</body>
+</html>
