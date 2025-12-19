@@ -169,6 +169,15 @@
                         <button onclick="switchView('reports')" id="btn-reports" class="nav-btn hidden flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-700/50">
                             <i class="fas fa-chart-pie"></i> التقارير
                         </button>
+                        <button onclick="switchView('inventory')" id="btn-inventory" class="nav-btn hidden flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-700/50">
+                            <i class="fas fa-boxes"></i> المخزون
+                        </button>
+                        <button onclick="switchView('expenses')" id="btn-expenses" class="nav-btn hidden flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-700/50">
+                            <i class="fas fa-wallet"></i> المصروفات
+                        </button>
+                        <button onclick="switchView('settings')" id="btn-settings" class="nav-btn hidden flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-700/50">
+                            <i class="fas fa-cog"></i> الإعدادات
+                        </button>
                         <button onclick="switchView('admin')" id="btn-admin" class="nav-btn hidden flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-700/50 border-r border-slate-600 mr-2 pr-2">
                             <i class="fas fa-database"></i> البيانات
                         </button>
@@ -294,61 +303,165 @@
             <!-- REPORTS VIEW -->
             <div id="reports-view" class="view-section absolute inset-0 flex flex-col bg-slate-100/50 hidden opacity-0 transition-opacity duration-300">
                 <div class="p-8 max-w-6xl mx-auto w-full h-full overflow-y-auto">
-                    <h2 class="text-3xl font-black text-slate-800 mb-6"><i class="fas fa-chart-pie text-purple-500 ml-2"></i>التقارير والإحصائيات</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <div class="bg-white p-6 rounded-2xl shadow border-r-4 border-blue-500"><p class="text-slate-500 font-bold text-xs uppercase">إجمالي المبيعات</p><p id="report-total-sales" class="text-2xl font-black text-slate-800 mt-2">0 ر.س</p></div>
-                        <div class="bg-white p-6 rounded-2xl shadow border-r-4 border-green-500"><p class="text-slate-500 font-bold text-xs uppercase">عدد الطلبات المكتملة</p><p id="report-total-orders" class="text-2xl font-black text-slate-800 mt-2">0</p></div>
-                        <div class="bg-white p-6 rounded-2xl shadow border-r-4 border-red-500"><p class="text-slate-500 font-bold text-xs uppercase">الفواتير الملغاة</p><p id="report-cancelled" class="text-2xl font-black text-slate-800 mt-2">0</p></div>
-                        <div class="bg-white p-6 rounded-2xl shadow border-r-4 border-orange-500"><p class="text-slate-500 font-bold text-xs uppercase">أكثر صنف مبيعاً</p><p id="report-top-item" class="text-lg font-bold text-slate-800 mt-2">-</p></div>
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-black text-slate-800"><i class="fas fa-chart-pie text-purple-500 ml-2"></i>التقارير المالية والتحليلات</h2>
+                        <button onclick="renderReports()" class="bg-white border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-50"><i class="fas fa-sync-alt ml-2"></i>تحديث</button>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl shadow mb-8"><h3 class="font-bold text-lg mb-6 text-slate-800">تحليل المبيعات حسب الفئة</h3><div class="space-y-6" id="category-bars"></div></div>
+                    
+                    <!-- Financial Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-2xl shadow border-r-4 border-emerald-500">
+                            <p class="text-slate-500 font-bold text-xs uppercase">إجمالي المبيعات (الإيرادات)</p>
+                            <p id="report-total-sales" class="text-2xl font-black text-emerald-600 mt-2">0 ر.س</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow border-r-4 border-blue-500">
+                            <p class="text-slate-500 font-bold text-xs uppercase">تكلفة البضاعة المباعة (COGS)</p>
+                            <p id="report-cogs" class="text-2xl font-black text-blue-600 mt-2">0 ر.س</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow border-r-4 border-red-500">
+                            <p class="text-slate-500 font-bold text-xs uppercase">إجمالي المصروفات التشغيلية</p>
+                            <p id="report-expenses" class="text-2xl font-black text-red-600 mt-2">0 ر.س</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow border-r-4 border-purple-600">
+                            <p class="text-slate-500 font-bold text-xs uppercase">صافي الأرباح / الخسائر</p>
+                            <p id="report-net-profit" class="text-2xl font-black text-purple-700 mt-2">0 ر.س</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-2xl shadow">
+                            <h3 class="font-bold text-lg mb-6 text-slate-800 border-b pb-2">تحليل المبيعات حسب الفئة</h3>
+                            <div class="space-y-6" id="category-bars"></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow">
+                            <h3 class="font-bold text-lg mb-6 text-slate-800 border-b pb-2">ملخص العمليات</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center"><span class="text-slate-600 font-bold">عدد الطلبات المكتملة</span><span id="report-total-orders" class="font-black text-slate-800">0</span></div>
+                                <div class="flex justify-between items-center"><span class="text-slate-600 font-bold">الفواتير الملغاة</span><span id="report-cancelled" class="font-black text-red-500">0</span></div>
+                                <div class="flex justify-between items-center"><span class="text-slate-600 font-bold">أكثر صنف مبيعاً</span><span id="report-top-item" class="font-black text-sky-600">-</span></div>
+                                <div class="flex justify-between items-center"><span class="text-slate-600 font-bold">قيمة المخزون الحالي</span><span id="report-stock-value" class="font-black text-slate-800">0 ر.س</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INVENTORY VIEW -->
+            <div id="inventory-view" class="view-section absolute inset-0 flex flex-col bg-slate-100/50 hidden opacity-0 transition-opacity duration-300">
+                <div class="p-8 max-w-6xl mx-auto w-full h-full overflow-y-auto">
+                    <div class="flex gap-4 mb-6 border-b pb-2">
+                        <button onclick="switchInventoryTab('stock')" id="tab-inv-stock" class="inv-tab-btn px-4 py-2 font-bold text-sky-600 border-b-2 border-sky-600">حالة المخزون</button>
+                        <button onclick="switchInventoryTab('purchases')" id="tab-inv-purchases" class="inv-tab-btn px-4 py-2 font-bold text-slate-500 hover:text-sky-600">سجل المشتريات</button>
+                        <button onclick="switchInventoryTab('movements')" id="tab-inv-movements" class="inv-tab-btn px-4 py-2 font-bold text-slate-500 hover:text-sky-600">حركة المخزون</button>
+                    </div>
+
+                    <!-- Stock Tab -->
+                    <div id="inv-content-stock">
+                        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+                            <table class="w-full text-sm text-right text-slate-600">
+                                <thead class="bg-slate-50 text-slate-700 uppercase font-bold"><tr><th class="px-6 py-4">الصنف</th><th class="px-6 py-4">الكمية الحالية</th><th class="px-6 py-4">سعر التكلفة</th><th class="px-6 py-4">سعر البيع</th><th class="px-6 py-4">القيمة الإجمالية</th><th class="px-6 py-4">الحالة</th><th class="px-6 py-4 text-center">تعديل</th></tr></thead>
+                                <tbody id="inventory-stock-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Purchases Tab -->
+                    <div id="inv-content-purchases" class="hidden">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-xl text-slate-800">فواتير المشتريات</h3>
+                            <button onclick="openAddPurchaseModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg shadow-md font-bold flex items-center gap-2"><i class="fas fa-plus"></i> فاتورة شراء جديدة</button>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                            <table class="w-full text-sm text-right text-slate-600">
+                                <thead class="bg-slate-50 text-slate-700 uppercase font-bold"><tr><th class="px-6 py-4">رقم الفاتورة</th><th class="px-6 py-4">التاريخ</th><th class="px-6 py-4">المورد</th><th class="px-6 py-4">الإجمالي</th><th class="px-6 py-4">ملاحظات</th><th class="px-6 py-4">التفاصيل</th></tr></thead>
+                                <tbody id="inventory-purchases-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Movements Tab -->
+                    <div id="inv-content-movements" class="hidden">
+                        <h3 class="font-bold text-xl text-slate-800 mb-6">سجل حركة المخزون</h3>
+                        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                            <table class="w-full text-sm text-right text-slate-600">
+                                <thead class="bg-slate-50 text-slate-700 uppercase font-bold"><tr><th class="px-6 py-4">التاريخ</th><th class="px-6 py-4">الصنف</th><th class="px-6 py-4">العملية</th><th class="px-6 py-4">الكمية</th><th class="px-6 py-4">المستخدم</th><th class="px-6 py-4">ملاحظات</th></tr></thead>
+                                <tbody id="inventory-movements-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXPENSES VIEW -->
+            <div id="expenses-view" class="view-section absolute inset-0 flex flex-col bg-slate-100/50 hidden opacity-0 transition-opacity duration-300">
+                <div class="p-8 max-w-6xl mx-auto w-full h-full overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-black text-slate-800"><i class="fas fa-wallet text-red-500 ml-2"></i>المصروفات التشغيلية</h2>
+                        <button onclick="openAddExpenseModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-md font-bold flex items-center gap-2"><i class="fas fa-plus"></i> تسجيل مصروف</button>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                        <table class="w-full text-sm text-right text-slate-600">
+                            <thead class="bg-slate-50 text-slate-700 uppercase font-bold"><tr><th class="px-6 py-4">التاريخ</th><th class="px-6 py-4">البند / الفئة</th><th class="px-6 py-4">المبلغ</th><th class="px-6 py-4">الوصف</th><th class="px-6 py-4">المستخدم</th><th class="px-6 py-4 text-center">حذف</th></tr></thead>
+                            <tbody id="expenses-table-body"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <!-- ADMIN VIEW (DATA CONTROL) -->
             <div id="admin-view" class="view-section absolute inset-0 flex flex-col bg-slate-100 hidden opacity-0 transition-opacity duration-300">
                 <div class="p-8 max-w-6xl mx-auto w-full h-full overflow-y-auto">
-                    <!-- Tabs for Admin -->
-                    <div class="flex gap-4 mb-6 border-b pb-2">
-                        <button onclick="switchAdminTab('data')" id="tab-data" class="admin-tab-btn px-4 py-2 font-bold text-sky-600 border-b-2 border-sky-600">إدارة البيانات والأصناف</button>
-                        <button onclick="switchAdminTab('users')" id="tab-users" class="admin-tab-btn px-4 py-2 font-bold text-slate-500 hover:text-sky-600">إدارة المستخدمين والصلاحيات</button>
+                    <div class="flex justify-between items-center mb-8">
+                        <div><h2 class="text-2xl font-black text-slate-800 mb-2">قائمة الأصناف</h2><p class="text-slate-500">إدارة الأصناف، المخزون، والأسعار.</p></div>
+                        <div class="flex gap-2">
+                            <button onclick="openAddItemModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg shadow-md font-bold flex items-center gap-2 transition"><i class="fas fa-plus-circle"></i> إضافة صنف</button>
+                            <button onclick="generateMarketingPost()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md font-bold flex items-center gap-2 transition"><i class="fas fa-bullhorn"></i> ✨ توليد إعلان</button>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8"><table class="w-full text-sm text-right text-slate-600"><thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b"><tr><th class="px-6 py-4">الصنف</th><th class="px-6 py-4">الفئة</th><th class="px-6 py-4">السعر (ر.س)</th><th class="px-6 py-4">التكلفة (ر.س)</th><th class="px-6 py-4">الحالة (Stock)</th><th class="px-6 py-4 text-center">تحديث</th></tr></thead><tbody id="admin-table-body"></tbody></table></div>
+                </div>
+            </div>
+
+            <!-- SETTINGS VIEW -->
+            <div id="settings-view" class="view-section absolute inset-0 flex flex-col bg-slate-100 hidden opacity-0 transition-opacity duration-300">
+                <div class="p-8 max-w-6xl mx-auto w-full h-full overflow-y-auto">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6"><i class="fas fa-cog text-slate-500 ml-2"></i>الإعدادات والمستخدمين</h2>
+                    
+                    <!-- General Settings -->
+                    <div class="bg-white rounded-2xl shadow-md p-6 mb-8">
+                        <h3 class="font-bold text-lg text-slate-800 mb-4 border-b pb-2">إعدادات النظام</h3>
+                        <div class="flex items-center justify-between">
+                            <div><p class="font-bold text-slate-700">عدد الطاولات</p><p class="text-xs text-slate-500">عدد الطاولات المتاحة في صالة الطعام</p></div>
+                            <div class="flex items-center gap-2"><input type="number" id="settings-table-count" class="w-20 border rounded p-2 text-center" min="1" max="100"><button onclick="saveTableSettings()" class="bg-sky-500 text-white px-4 py-2 rounded hover:bg-sky-600 font-bold text-sm">حفظ</button></div>
+                        </div>
                     </div>
 
-                    <!-- DATA TAB CONTENT -->
-                    <div id="admin-content-data">
-                        <div class="flex justify-between items-center mb-8">
-                            <div><h2 class="text-2xl font-black text-slate-800 mb-2">قائمة الأصناف</h2><p class="text-slate-500">إدارة الأصناف، المخزون، والأسعار.</p></div>
-                            <div class="flex gap-2">
-                                <button onclick="openAddItemModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg shadow-md font-bold flex items-center gap-2 transition"><i class="fas fa-plus-circle"></i> إضافة صنف</button>
-                                <button onclick="generateMarketingPost()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md font-bold flex items-center gap-2 transition"><i class="fas fa-bullhorn"></i> ✨ توليد إعلان</button>
-                            </div>
+                    <!-- Subscription Settings -->
+                    <div class="bg-white rounded-2xl shadow-md p-6 mb-8 border-r-4 border-purple-500">
+                        <h3 class="font-bold text-lg text-slate-800 mb-4 border-b pb-2">حالة الاشتراك</h3>
+                        <div class="flex items-center justify-between">
+                            <div><p class="font-bold text-slate-700" id="sub-status-text">جاري التحقق...</p><p class="text-xs text-slate-500" id="sub-expiry-text">ينتهي في: -</p></div>
+                            <div class="flex items-center gap-2"><input type="text" id="settings-sub-code" class="w-64 border rounded p-2 text-left text-xs font-mono" placeholder="أدخل كود التفعيل الجديد"><button onclick="updateSubscriptionFromSettings()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 font-bold text-sm">تجديد</button></div>
                         </div>
-                        <div class="bg-white rounded-2xl shadow-md p-6 mb-8 flex items-center justify-between">
-                            <div><h3 class="font-bold text-lg text-slate-800 mb-1">إعدادات المطعم</h3><p class="text-sm text-slate-500">عدد الطاولات المتاحة.</p></div>
-                            <div class="flex items-center gap-2"><label class="font-bold text-sm">عدد الطاولات:</label><input type="number" id="settings-table-count" class="w-20 border rounded p-2 text-center" min="1" max="100"><button onclick="saveTableSettings()" class="bg-sky-500 text-white px-4 py-2 rounded hover:bg-sky-600 font-bold text-sm">حفظ</button></div>
-                        </div>
-                        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8"><table class="w-full text-sm text-right text-slate-600"><thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b"><tr><th class="px-6 py-4">الصنف</th><th class="px-6 py-4">الفئة</th><th class="px-6 py-4">السعر (ر.س)</th><th class="px-6 py-4">الحالة (Stock)</th><th class="px-6 py-4 text-center">تحديث</th></tr></thead><tbody id="admin-table-body"></tbody></table></div>
                     </div>
 
-                    <!-- USERS TAB CONTENT -->
-                    <div id="admin-content-users" class="hidden">
-                        <div class="flex justify-between items-center mb-8">
-                            <div><h2 class="text-2xl font-black text-slate-800 mb-2">المستخدمين والصلاحيات</h2><p class="text-slate-500">إضافة مستخدمين وتحديد الصفحات المسموحة.</p></div>
+                    <!-- Users Management -->
+                    <div class="bg-white rounded-2xl shadow-md p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <div><h3 class="font-bold text-lg text-slate-800">إدارة المستخدمين</h3><p class="text-sm text-slate-500">إنشاء حسابات وتحديد الصلاحيات</p></div>
                             <button onclick="openAddUserModal()" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg shadow-md font-bold flex items-center gap-2 transition"><i class="fas fa-user-plus"></i> مستخدم جديد</button>
                         </div>
-                        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-                            <table class="w-full text-sm text-right text-slate-600">
-                                <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b">
-                                    <tr>
-                                        <th class="px-6 py-4">الاسم</th>
-                                        <th class="px-6 py-4">البريد الإلكتروني</th>
-                                        <th class="px-6 py-4">الصلاحيات (الصفحات)</th>
-                                        <th class="px-6 py-4 text-center">حذف</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="users-table-body"></tbody>
-                            </table>
-                        </div>
+                        <table class="w-full text-sm text-right text-slate-600">
+                            <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b">
+                                <tr>
+                                    <th class="px-6 py-4">الاسم</th>
+                                    <th class="px-6 py-4">البريد الإلكتروني</th>
+                                    <th class="px-6 py-4">الصلاحيات</th>
+                                    <th class="px-6 py-4 text-center">حذف</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -374,13 +487,26 @@
     <!-- Add Item Modal (Same as before) -->
     <div id="add-item-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[65] hidden flex items-center justify-center">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
-            <div class="bg-emerald-600 text-white p-4 flex justify-between items-center"><h3 class="font-bold text-lg">إضافة صنف</h3><button onclick="closeModal('add-item-modal')" class="text-white/80 hover:text-white"><i class="fas fa-times text-xl"></i></button></div>
+            <div class="bg-emerald-600 text-white p-4 flex justify-between items-center"><h3 id="modal-item-title" class="font-bold text-lg">إضافة صنف</h3><button onclick="closeModal('add-item-modal')" class="text-white/80 hover:text-white"><i class="fas fa-times text-xl"></i></button></div>
             <div class="p-6 space-y-4">
                 <div><label class="block text-sm font-bold text-slate-700 mb-1">الاسم</label><input type="text" id="new-item-name" class="w-full border rounded p-2"></div>
-                <div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-bold text-slate-700 mb-1">السعر</label><input type="number" id="new-item-price" class="w-full border rounded p-2"></div><div><label class="block text-sm font-bold text-slate-700 mb-1">الوحدة</label><select id="new-item-type" class="w-full border rounded p-2"><option value="unit">عدد</option><option value="weight">وزن</option></select></div></div>
+                <div class="grid grid-cols-3 gap-4"><div><label class="block text-sm font-bold text-slate-700 mb-1">السعر</label><input type="number" id="new-item-price" class="w-full border rounded p-2"></div><div><label class="block text-sm font-bold text-slate-700 mb-1">التكلفة</label><input type="number" id="new-item-cost" class="w-full border rounded p-2"></div><div><label class="block text-sm font-bold text-slate-700 mb-1">الوحدة</label><select id="new-item-type" class="w-full border rounded p-2"><option value="unit">عدد</option><option value="weight">وزن</option></select></div></div>
                 <div><label class="block text-sm font-bold text-slate-700 mb-1">الفئة</label><select id="new-item-category" class="w-full border rounded p-2"><option value="fish">أسماك</option><option value="shrimp">جمبري</option><option value="sides">جانبي</option><option value="drinks">مشروبات</option></select></div>
             </div>
             <div class="p-4 bg-slate-50 border-t flex justify-end gap-3"><button onclick="closeModal('add-item-modal')" class="px-4 py-2 font-bold hover:bg-slate-200 rounded-lg">إلغاء</button><button onclick="saveNewItem()" class="px-6 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700">حفظ</button></div>
+        </div>
+    </div>
+
+    <!-- STOCK ADJUSTMENT MODAL -->
+    <div id="stock-adjust-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[85] hidden flex items-center justify-center">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden modal-enter">
+            <div class="bg-slate-800 text-white p-4 flex justify-between items-center"><h3 class="font-bold text-lg">تعديل المخزون</h3><button onclick="closeModal('stock-adjust-modal')" class="text-white/80 hover:text-white"><i class="fas fa-times text-xl"></i></button></div>
+            <div class="p-6 space-y-4">
+                <p class="font-bold text-slate-700" id="adjust-item-name"></p>
+                <div><label class="block text-sm font-bold text-slate-700 mb-1">الكمية (موجب إضافة / سالب خصم)</label><input type="number" id="adjust-qty" class="w-full border rounded p-2 text-center font-bold" placeholder="0"></div>
+                <div><label class="block text-sm font-bold text-slate-700 mb-1">سبب التعديل</label><select id="adjust-reason" class="w-full border rounded p-2"><option value="correction">تصحح جرد</option><option value="damage">تالف / هالك</option><option value="gift">ضيافة / هدية</option><option value="return">مرتجع</option><option value="other">أخرى</option></select></div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t flex justify-end gap-3"><button onclick="closeModal('stock-adjust-modal')" class="px-4 py-2 font-bold hover:bg-slate-200 rounded-lg">إلغاء</button><button onclick="saveStockAdjustment()" class="px-6 py-2 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-900">حفظ التعديل</button></div>
         </div>
     </div>
 
@@ -388,7 +514,7 @@
     <div id="add-user-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[75] hidden flex items-center justify-center">
         <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden modal-enter">
             <div class="bg-slate-800 text-white p-4 flex justify-between items-center">
-                <h3 class="font-bold text-lg"><i class="fas fa-user-plus"></i> مستخدم جديد</h3>
+                <h3 id="modal-user-title" class="font-bold text-lg"><i class="fas fa-user-plus"></i> مستخدم جديد</h3>
                 <button onclick="closeModal('add-user-modal')" class="text-white/80 hover:text-white"><i class="fas fa-times text-xl"></i></button>
             </div>
             <div class="p-6 space-y-4">
@@ -406,14 +532,86 @@
                         <label class="flex items-center space-x-2 space-x-reverse"><input type="checkbox" value="delivery" class="perm-check w-4 h-4 text-sky-600"> <span>الدليفري</span></label>
                         <label class="flex items-center space-x-2 space-x-reverse"><input type="checkbox" value="transactions" class="perm-check w-4 h-4 text-sky-600"> <span>سجل الفواتير</span></label>
                         <label class="flex items-center space-x-2 space-x-reverse"><input type="checkbox" value="reports" class="perm-check w-4 h-4 text-sky-600"> <span>التقارير</span></label>
+                        <label class="flex items-center space-x-2 space-x-reverse"><input type="checkbox" value="inventory" class="perm-check w-4 h-4 text-sky-600"> <span>المخزون والمشتريات</span></label>
+                        <label class="flex items-center space-x-2 space-x-reverse"><input type="checkbox" value="expenses" class="perm-check w-4 h-4 text-sky-600"> <span>المصروفات</span></label>
+                        <label class="flex items-center space-x-2 space-x-reverse"><input type="checkbox" value="settings" class="perm-check w-4 h-4 text-sky-600"> <span>الإعدادات والمستخدمين</span></label>
                         <label class="flex items-center space-x-2 space-x-reverse"><input type="checkbox" value="admin" class="perm-check w-4 h-4 text-sky-600"> <span>إدارة البيانات (Admin)</span></label>
                     </div>
                 </div>
             </div>
             <div class="p-4 bg-slate-50 border-t flex justify-end gap-3">
                 <button onclick="closeModal('add-user-modal')" class="px-4 py-2 font-bold hover:bg-slate-200 rounded-lg">إلغاء</button>
-                <button onclick="saveNewUser()" class="px-6 py-2 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-900">إنشاء المستخدم</button>
+                <button onclick="saveNewUser()" class="px-6 py-2 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-900">حفظ البيانات</button>
             </div>
+        </div>
+    </div>
+
+    <!-- SUBSCRIPTION LOCK MODAL -->
+    <div id="subscription-modal" class="fixed inset-0 bg-slate-900 z-[200] hidden flex items-center justify-center">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 text-center border-4 border-red-500 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-red-500"></div>
+            <i class="fas fa-lock text-6xl text-red-500 mb-6"></i>
+            <h2 class="text-2xl font-black text-slate-800 mb-2">النظام متوقف</h2>
+            <p class="text-slate-500 mb-6">انتهت صلاحية اشتراك النظام أو لم يتم تفعيله بعد.<br>يرجى التواصل مع الدعم الفني للحصول على كود التفعيل.</p>
+            
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 text-right">
+                <label class="block text-xs font-bold text-slate-700 mb-2">كود التفعيل</label>
+                <input type="text" id="activation-code-input" class="w-full border border-slate-300 rounded-lg p-3 text-center font-mono text-lg focus:ring-2 focus:ring-red-500 outline-none" placeholder="HEKAYA-...">
+            </div>
+            
+            <button onclick="activateSystem()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:scale-[1.02]">تفعيل النظام</button>
+            
+            <div class="mt-6 text-xs text-slate-400">
+                <p class="mb-2 font-bold">للحصول على كود التفعيل أو الدعم الفني:</p>
+                <div class="flex flex-col gap-2 items-center">
+                    <a href="tel:+201067765058" class="flex items-center gap-2 hover:text-slate-600 transition"><i class="fas fa-phone-alt"></i> 01067765058</a>
+                    <a href="https://wa.me/201067765058" target="_blank" class="flex items-center gap-2 text-green-600 hover:text-green-700 font-bold bg-green-50 px-3 py-1 rounded-full border border-green-200 transition"><i class="fab fa-whatsapp text-lg"></i> تواصل مباشرة عبر واتساب</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD EXPENSE MODAL -->
+    <div id="add-expense-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[75] hidden flex items-center justify-center">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
+            <div class="bg-red-600 text-white p-4 flex justify-between items-center"><h3 id="modal-expense-title" class="font-bold text-lg">تسجيل مصروف جديد</h3><button onclick="closeModal('add-expense-modal')" class="text-white/80 hover:text-white"><i class="fas fa-times text-xl"></i></button></div>
+            <div class="p-6 space-y-4">
+                <div><label class="block text-sm font-bold text-slate-700 mb-1">البند / الفئة</label><select id="exp-category" class="w-full border rounded p-2"><option value="rent">إيجار</option><option value="wages">رواتب وأجور</option><option value="electricity">كهرباء ومياه</option><option value="supplies">مستلزمات تشغيل</option><option value="maintenance">صيانة</option><option value="marketing">تسويق</option><option value="other">نثريات / أخرى</option></select></div>
+                <div><label class="block text-sm font-bold text-slate-700 mb-1">المبلغ</label><input type="number" id="exp-amount" class="w-full border rounded p-2" placeholder="0.00"></div>
+                <div><label class="block text-sm font-bold text-slate-700 mb-1">الوصف / ملاحظات</label><textarea id="exp-note" class="w-full border rounded p-2" rows="2"></textarea></div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t flex justify-end gap-3"><button onclick="closeModal('add-expense-modal')" class="px-4 py-2 font-bold hover:bg-slate-200 rounded-lg">إلغاء</button><button onclick="saveExpense()" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">حفظ المصروف</button></div>
+        </div>
+    </div>
+
+    <!-- ADD PURCHASE MODAL -->
+    <div id="add-purchase-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[80] hidden flex items-center justify-center">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden modal-enter flex flex-col max-h-[90vh]">
+            <div class="bg-emerald-700 text-white p-4 flex justify-between items-center"><h3 class="font-bold text-lg">فاتورة مشتريات جديدة</h3><button onclick="closeModal('add-purchase-modal')" class="text-white/80 hover:text-white"><i class="fas fa-times text-xl"></i></button></div>
+            <div class="p-6 overflow-y-auto flex-1 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-sm font-bold text-slate-700 mb-1">المورد</label><input type="text" id="pur-supplier" class="w-full border rounded p-2" placeholder="اسم المورد"></div>
+                    <div><label class="block text-sm font-bold text-slate-700 mb-1">التاريخ</label><input type="date" id="pur-date" class="w-full border rounded p-2"></div>
+                </div>
+                <div class="border-t pt-4">
+                    <h4 class="font-bold text-slate-800 mb-2">بنود الفاتورة</h4>
+                    <div class="flex gap-2 mb-2">
+                        <select id="pur-item-select" class="flex-1 border rounded p-2 text-sm"></select>
+                        <input type="number" id="pur-item-qty" class="w-20 border rounded p-2 text-sm text-center" placeholder="الكمية">
+                        <input type="number" id="pur-item-cost" class="w-24 border rounded p-2 text-sm text-center" placeholder="التكلفة">
+                        <button onclick="addPurchaseItemRow()" class="bg-sky-500 text-white px-3 rounded hover:bg-sky-600"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div class="bg-slate-50 rounded border h-40 overflow-y-auto">
+                        <table class="w-full text-xs text-right">
+                            <thead class="bg-slate-100 text-slate-600 sticky top-0"><tr><th class="p-2">الصنف</th><th class="p-2">الكمية</th><th class="p-2">التكلفة</th><th class="p-2">الإجمالي</th><th class="p-2"></th></tr></thead>
+                            <tbody id="pur-items-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div><label class="block text-sm font-bold text-slate-700 mb-1">ملاحظات</label><input type="text" id="pur-notes" class="w-full border rounded p-2"></div>
+                <div class="text-xl font-black text-slate-800 text-left">الإجمالي: <span id="pur-total-display" class="text-emerald-600">0.00</span> ر.س</div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t flex justify-end gap-3"><button onclick="closeModal('add-purchase-modal')" class="px-4 py-2 font-bold hover:bg-slate-200 rounded-lg">إلغاء</button><button onclick="savePurchase()" class="px-6 py-2 bg-emerald-700 text-white font-bold rounded-lg hover:bg-emerald-800">حفظ الفاتورة</button></div>
         </div>
     </div>
 
@@ -428,36 +626,105 @@
         <div><h4 class="font-bold text-sm">تم بنجاح</h4><p id="notif-text" class="text-xs text-slate-300 mt-0.5">...</p></div>
     </div>
 
+    <!-- Firebase Integration -->
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
+      import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+      // TODO: Add SDKs for Firebase products that you want to use
+      // https://firebase.google.com/docs/web/setup#available-libraries
+
+      // Your web app's Firebase configuration
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      const firebaseConfig = {
+        apiKey: "AIzaSyBg30vbK9ayrQn35cohJXcBiwPzuxVIgc8",
+        authDomain: "crp1-51359.firebaseapp.com",
+        databaseURL: "https://crp1-51359-default-rtdb.firebaseio.com",
+        projectId: "crp1-51359",
+        storageBucket: "crp1-51359.firebasestorage.app",
+        messagingSenderId: "728709328234",
+        appId: "1:728709328234:web:a0f8e39a7d1210100b8913",
+        measurementId: "G-J8PHEN82ZW"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const db = getDatabase(app);
+
+      window.firebaseDb = db;
+      window.firebaseSet = set;
+      window.firebaseRef = ref;
+    </script>
+
     <script>
         const apiKey = ""; 
-        let tablesCount = 6;
-        let menuItems = [
-            { id: 1, name: "جمبري جامبو", price: 160, category: "shrimp", type: "weight", icon: "fa-shrimp", color: "text-orange-500", inStock: true },
-            { id: 2, name: "استاكوزا", price: 220, category: "shrimp", type: "weight", icon: "fa-spider", color: "text-red-600", inStock: true },
-            { id: 3, name: "سمك دنيس", price: 55, category: "fish", type: "weight", icon: "fa-fish", color: "text-blue-500", inStock: true },
-            { id: 4, name: "سمك قاروص", price: 70, category: "fish", type: "weight", icon: "fa-fish", color: "text-blue-600", inStock: true },
-            { id: 5, name: "فيليه هامور", price: 45, category: "fish", type: "unit", icon: "fa-utensils", color: "text-yellow-600", inStock: true },
-            { id: 6, name: "طاجن سي فود", price: 60, category: "fish", type: "unit", icon: "fa-bowl-food", color: "text-orange-700", inStock: true },
-            { id: 7, name: "كابوريا", price: 50, category: "shrimp", type: "weight", icon: "fa-certificate", color: "text-red-500", inStock: true },
-            { id: 8, name: "أرز صيادية", price: 15, category: "sides", type: "unit", icon: "fa-bowl-rice", color: "text-amber-700", inStock: true },
-            { id: 9, name: "سلطة طحينة", price: 8, category: "sides", type: "unit", icon: "fa-lemon", color: "text-yellow-500", inStock: true },
-            { id: 10, name: "شوربة سي فود", price: 35, category: "shrimp", type: "unit", icon: "fa-mug-hot", color: "text-orange-400", inStock: true },
-            { id: 11, name: "بيبسي", price: 5, category: "drinks", type: "unit", icon: "fa-bottle-water", color: "text-blue-800", inStock: true },
-            { id: 12, name: "عصير ليمون", price: 12, category: "drinks", type: "unit", icon: "fa-glass-water", color: "text-green-500", inStock: true }
-        ];
-        const cookingMethods = [{id:'grilled_oil',name:'مشوي زيت وليمون'},{id:'grilled_rada',name:'مشوي ردة'},{id:'singari',name:'سنجاري'},{id:'fried',name:'مقلي'},{id:'tagine',name:'طاجن'},{id:'butterfly',name:'باترفلاي'}];
         
-        let cart = [], systemOrders = [], currentModalItem = null, currentPayOrderId = null;
-        const VAT_RATE = 0.15;
-
-        // --- AUTH & USERS SYSTEM ---
-        let currentUser = null;
-        // Default Users
-        let users = [
-            { id: 1, name: "المدير العام", email: "admin@hekaya.com", pass: "123456", perms: ['waiter','system','delivery','transactions','reports','admin'] },
+        // --- DATA PERSISTENCE & DEFAULTS ---
+        const defaultMenuItems = [
+            { id: 1, name: "جمبري جامبو", price: 160, cost: 110, stockQty: 50, category: "shrimp", type: "weight", icon: "fa-shrimp", color: "text-orange-500", inStock: true },
+            { id: 2, name: "استاكوزا", price: 220, cost: 150, stockQty: 30, category: "shrimp", type: "weight", icon: "fa-spider", color: "text-red-600", inStock: true },
+            { id: 3, name: "سمك دنيس", price: 55, cost: 35, stockQty: 100, category: "fish", type: "weight", icon: "fa-fish", color: "text-blue-500", inStock: true },
+            { id: 4, name: "سمك قاروص", price: 70, cost: 45, stockQty: 80, category: "fish", type: "weight", icon: "fa-fish", color: "text-blue-600", inStock: true },
+            { id: 5, name: "فيليه هامور", price: 45, cost: 25, stockQty: 200, category: "fish", type: "unit", icon: "fa-utensils", color: "text-yellow-600", inStock: true },
+            { id: 6, name: "طاجن سي فود", price: 60, cost: 35, stockQty: 40, category: "fish", type: "unit", icon: "fa-bowl-food", color: "text-orange-700", inStock: true },
+            { id: 7, name: "كابوريا", price: 50, cost: 30, stockQty: 60, category: "shrimp", type: "weight", icon: "fa-certificate", color: "text-red-500", inStock: true },
+            { id: 8, name: "أرز صيادية", price: 15, cost: 5, stockQty: 500, category: "sides", type: "unit", icon: "fa-bowl-rice", color: "text-amber-700", inStock: true },
+            { id: 9, name: "سلطة طحينة", price: 8, cost: 2, stockQty: 200, category: "sides", type: "unit", icon: "fa-lemon", color: "text-yellow-500", inStock: true },
+            { id: 10, name: "شوربة سي فود", price: 35, cost: 15, stockQty: 100, category: "shrimp", type: "unit", icon: "fa-mug-hot", color: "text-orange-400", inStock: true },
+            { id: 11, name: "بيبسي", price: 5, cost: 2.5, stockQty: 240, category: "drinks", type: "unit", icon: "fa-bottle-water", color: "text-blue-800", inStock: true },
+            { id: 12, name: "عصير ليمون", price: 12, cost: 4, stockQty: 100, category: "drinks", type: "unit", icon: "fa-glass-water", color: "text-green-500", inStock: true }
+        ];
+        const defaultUsers = [
+            { id: 1, name: "المدير العام", email: "admin@hekaya.com", pass: "123456", perms: ['waiter','system','delivery','transactions','reports','inventory','expenses','admin','settings'] },
             { id: 2, name: "نادل 1", email: "waiter@hekaya.com", pass: "123456", perms: ['waiter'] },
             { id: 3, name: "كاشير", email: "cashier@hekaya.com", pass: "123456", perms: ['system','transactions'] }
         ];
+
+        const cookingMethods = [{id:'grilled_oil',name:'مشوي زيت وليمون'},{id:'grilled_rada',name:'مشوي ردة'},{id:'singari',name:'سنجاري'},{id:'fried',name:'مقلي'},{id:'tagine',name:'طاجن'},{id:'butterfly',name:'باترفلاي'}];
+        
+        let cart = [], currentModalItem = null, currentPayOrderId = null, currentAdjustItemId = null, editingUserId = null, editingItemId = null, editingExpenseId = null;
+        let tempPurchaseItems = [];
+        const VAT_RATE = 0.15;
+
+        // Load Data from LocalStorage
+        let tablesCount = parseInt(localStorage.getItem('pos_tablesCount')) || 6;
+        let menuItems = JSON.parse(localStorage.getItem('pos_menuItems')) || defaultMenuItems;
+        let users = JSON.parse(localStorage.getItem('pos_users')) || defaultUsers;
+        let systemOrders = JSON.parse(localStorage.getItem('pos_orders')) || [];
+        let expenses = (JSON.parse(localStorage.getItem('pos_expenses')) || []).map(e => ({...e, id: e.id || Date.now() + Math.random()}));
+        let purchases = JSON.parse(localStorage.getItem('pos_purchases')) || [];
+        let stockMovements = JSON.parse(localStorage.getItem('pos_stockMovements')) || [];
+        let subscriptionCode = localStorage.getItem('pos_subscription_code') || '';
+
+        let currentUser = null;
+
+        function saveData() {
+            localStorage.setItem('pos_tablesCount', tablesCount);
+            localStorage.setItem('pos_menuItems', JSON.stringify(menuItems));
+            localStorage.setItem('pos_users', JSON.stringify(users));
+            localStorage.setItem('pos_orders', JSON.stringify(systemOrders));
+            localStorage.setItem('pos_expenses', JSON.stringify(expenses));
+            localStorage.setItem('pos_purchases', JSON.stringify(purchases));
+            localStorage.setItem('pos_stockMovements', JSON.stringify(stockMovements));
+            localStorage.setItem('pos_subscription_code', subscriptionCode);
+            
+            // Save to Firebase (Backup)
+            if(window.firebaseDb && window.firebaseSet && window.firebaseRef) {
+                window.firebaseSet(window.firebaseRef(window.firebaseDb, 'backup'), {
+                    tablesCount,
+                    menuItems,
+                    users,
+                    orders: systemOrders,
+                    expenses,
+                    purchases,
+                    stockMovements,
+                    subscriptionCode,
+                    lastUpdated: new Date().toISOString()
+                }).catch(err => console.error("Firebase Save Error:", err));
+            }
+        }
 
         function handleLogin(e) {
             e.preventDefault();
@@ -467,6 +734,13 @@
             const user = users.find(u => u.email === email && u.pass === pass);
             
             if(user) {
+                // Check Subscription BEFORE logging in
+                const subStatus = validateSubscription(subscriptionCode);
+                if (!subStatus.valid) {
+                    document.getElementById('subscription-modal').classList.remove('hidden');
+                    return; // Stop login
+                }
+
                 currentUser = user;
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
@@ -474,8 +748,12 @@
                 updateNavBasedOnPerms();
                 
                 // Route to first available view
-                if(user.perms.includes('admin')) switchView('admin');
-                else switchView(user.perms[0]);
+                if(user.perms.length > 0) {
+                    if(user.perms.includes('admin')) switchView('admin');
+                    else switchView(user.perms[0]);
+                } else {
+                    showNotification('لا توجد صلاحيات لهذا المستخدم', 'error');
+                }
             } else {
                 document.getElementById('login-error').classList.remove('hidden');
             }
@@ -491,7 +769,7 @@
         }
 
         function updateNavBasedOnPerms() {
-            const btns = ['waiter', 'system', 'delivery', 'transactions', 'reports', 'admin'];
+            const btns = ['waiter', 'system', 'delivery', 'transactions', 'reports', 'inventory', 'expenses', 'admin', 'settings'];
             btns.forEach(view => {
                 const btn = document.getElementById(`btn-${view}`);
                 if(currentUser.perms.includes(view)) {
@@ -500,6 +778,75 @@
                     btn.classList.add('hidden');
                 }
             });
+        }
+
+        // --- SUBSCRIPTION SYSTEM ---
+        function validateSubscription(code) {
+            if (!code) return { valid: false, reason: 'missing' };
+            code = code.trim();
+            if (!code.startsWith('HEKAYA-')) return { valid: false, reason: 'invalid_format' };
+
+            try {
+                const base64 = code.replace('HEKAYA-', '').replace(/\s/g, '');
+                // Handle Unicode (Arabic) characters decoding correctly
+                let jsonStr;
+                try { jsonStr = decodeURIComponent(escape(atob(base64))); } 
+                catch (e) { jsonStr = atob(base64); }
+                
+                const data = JSON.parse(jsonStr);
+                
+                if (data.secret !== 'hekaya_secure_key_2025') return { valid: false, reason: 'invalid' };
+                
+                const now = new Date().getTime();
+                if (now > data.exp) return { valid: false, reason: 'expired', exp: data.exp };
+                
+                return { valid: true, exp: data.exp, client: data.client };
+            } catch (e) {
+                return { valid: false, reason: 'error' };
+            }
+        }
+
+        function activateSystem() {
+            const code = document.getElementById('activation-code-input').value.trim();
+            const result = validateSubscription(code);
+            
+            if (result.valid) {
+                subscriptionCode = code;
+                saveData();
+                document.getElementById('subscription-modal').classList.add('hidden');
+                showNotification('تم تفعيل النظام بنجاح');
+            } else {
+                alert('كود التفعيل غير صحيح أو منتهي الصلاحية!');
+            }
+        }
+
+        function updateSubscriptionFromSettings() {
+            const code = document.getElementById('settings-sub-code').value.trim();
+            const result = validateSubscription(code);
+            if (result.valid) {
+                subscriptionCode = code;
+                saveData();
+                renderSubscriptionStatus();
+                showNotification('تم تجديد الاشتراك بنجاح');
+                document.getElementById('settings-sub-code').value = '';
+            } else {
+                showNotification('الكود غير صالح', 'error');
+            }
+        }
+
+        function renderSubscriptionStatus() {
+            const result = validateSubscription(subscriptionCode);
+            const statusText = document.getElementById('sub-status-text');
+            const expiryText = document.getElementById('sub-expiry-text');
+            
+            if (result.valid) {
+                const date = new Date(result.exp).toLocaleDateString('ar-EG');
+                statusText.innerHTML = `<span class="text-green-600"><i class="fas fa-check-circle"></i> نشط</span>`;
+                expiryText.innerText = `ينتهي في: ${date}`;
+            } else {
+                statusText.innerHTML = `<span class="text-red-600"><i class="fas fa-times-circle"></i> غير نشط / منتهي</span>`;
+                expiryText.innerText = `يرجى التجديد فوراً`;
+            }
         }
 
         // --- INIT ---
@@ -529,22 +876,14 @@
             if (viewName === 'delivery') renderDeliveryOrders();
             if (viewName === 'transactions') renderTransactions();
             if (viewName === 'reports') renderReports();
-            if (viewName === 'admin') {
-                renderAdminTable();
+            if (viewName === 'inventory') renderInventory();
+            if (viewName === 'expenses') renderExpenses();
+            if (viewName === 'admin') renderAdminTable();
+            if (viewName === 'settings') {
+                document.getElementById('settings-table-count').value = tablesCount;
+                renderSubscriptionStatus();
                 renderUsersTable();
             }
-        }
-
-        // --- ADMIN TABS ---
-        function switchAdminTab(tab) {
-            document.getElementById('admin-content-data').classList.add('hidden');
-            document.getElementById('admin-content-users').classList.add('hidden');
-            
-            document.getElementById('tab-data').className = "admin-tab-btn px-4 py-2 font-bold text-slate-500 hover:text-sky-600";
-            document.getElementById('tab-users').className = "admin-tab-btn px-4 py-2 font-bold text-slate-500 hover:text-sky-600";
-
-            document.getElementById(`admin-content-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-${tab}`).className = "admin-tab-btn px-4 py-2 font-bold text-sky-600 border-b-2 border-sky-600";
         }
 
         // --- USER MANAGEMENT ---
@@ -558,8 +897,9 @@
                         <td class="px-6 py-4 font-bold text-slate-900">${u.name}</td>
                         <td class="px-6 py-4">${u.email}</td>
                         <td class="px-6 py-4">${permsBadges}</td>
-                        <td class="px-6 py-4 text-center">
-                            ${u.id !== 1 ? `<button onclick="deleteUser(${u.id})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>` : '<span class="text-gray-400 text-xs">لا يمكن حذفه</span>'}
+                        <td class="px-6 py-4 text-center flex justify-center gap-3">
+                            <button onclick="editUser(${u.id})" class="text-sky-500 hover:text-sky-700"><i class="fas fa-edit"></i></button>
+                            ${u.id !== 1 ? `<button onclick="deleteUser(${u.id})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>` : ''}
                         </td>
                     </tr>
                 `;
@@ -567,10 +907,24 @@
         }
 
         function openAddUserModal() {
+            editingUserId = null;
+            document.getElementById('modal-user-title').innerHTML = '<i class="fas fa-user-plus"></i> مستخدم جديد';
             document.getElementById('new-user-name').value = '';
             document.getElementById('new-user-email').value = '';
             document.getElementById('new-user-pass').value = '';
             document.querySelectorAll('.perm-check').forEach(c => c.checked = false);
+            document.getElementById('add-user-modal').classList.remove('hidden');
+        }
+
+        function editUser(id) {
+            const u = users.find(x => x.id === id);
+            if(!u) return;
+            editingUserId = id;
+            document.getElementById('modal-user-title').innerHTML = '<i class="fas fa-user-edit"></i> تعديل مستخدم';
+            document.getElementById('new-user-name').value = u.name;
+            document.getElementById('new-user-email').value = u.email;
+            document.getElementById('new-user-pass').value = u.pass;
+            document.querySelectorAll('.perm-check').forEach(c => c.checked = u.perms.includes(c.value));
             document.getElementById('add-user-modal').classList.remove('hidden');
         }
 
@@ -585,15 +939,23 @@
                 return;
             }
 
-            users.push({ id: Date.now(), name, email, pass, perms });
+            if(editingUserId) {
+                const u = users.find(x => x.id === editingUserId);
+                if(u) { u.name = name; u.email = email; u.pass = pass; u.perms = perms; }
+                showNotification('تم تحديث بيانات المستخدم');
+            } else {
+                users.push({ id: Date.now(), name, email, pass, perms });
+                showNotification('تم إضافة المستخدم بنجاح');
+            }
+            saveData();
             renderUsersTable();
             closeModal('add-user-modal');
-            showNotification('تم إضافة المستخدم بنجاح');
         }
 
         function deleteUser(id) {
             if(confirm('حذف المستخدم؟')) {
                 users = users.filter(u => u.id !== id);
+                saveData();
                 renderUsersTable();
             }
         }
@@ -610,7 +972,7 @@
         }
         function saveTableSettings() {
             const count = parseInt(document.getElementById('settings-table-count').value);
-            if(count && count > 0) { tablesCount = count; initTables(); showNotification('تم التحديث'); }
+            if(count && count > 0) { tablesCount = count; saveData(); initTables(); showNotification('تم التحديث'); }
         }
         function toggleDeliveryFields() {
             const type = document.getElementById('order-type-select').value;
@@ -683,24 +1045,40 @@
             const sub = cart.reduce((s,i)=>s+(i.price*i.qty),0);
             let order = { id: Date.now(), type, items: [...cart], subtotal: sub, tax: sub*VAT_RATE, total: sub*1.15, finalTotal: sub*1.15, time: new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}), status: 'pending', isCancelled: false };
             if(type==='delivery') { order.customer = {name: document.getElementById('cust-name').value||'عميل', phone: document.getElementById('cust-phone').value||'-', address: document.getElementById('cust-address').value||'-'}; order.table='دليفري'; order.deliveryStatus='preparing'; document.getElementById('cust-name').value=''; } else order.table=document.getElementById('table-select').value;
-            systemOrders.unshift(order); cart=[]; renderCart(); showNotification('تم إرسال الطلب');
+            
+            // Deduct Stock
+            order.items.forEach(orderItem => {
+                const menuItem = menuItems.find(m => m.id === orderItem.id);
+                if(menuItem) {
+                    menuItem.stockQty -= orderItem.qty;
+                    logStockMovement(menuItem.id, menuItem.name, -orderItem.qty, 'sale', `طلب #${order.id}`);
+                }
+            });
+
+            systemOrders.unshift(order); saveData(); cart=[]; renderCart(); showNotification('تم إرسال الطلب وخصم المخزون');
         }
         function renderSystemOrders() {
             const con=document.getElementById('orders-container'); con.innerHTML='';
             const active=systemOrders.filter(o=>o.type==='dine-in'&&!o.isCancelled);
             if(active.length===0) document.getElementById('no-orders-msg').classList.remove('hidden'); else document.getElementById('no-orders-msg').classList.add('hidden');
             document.getElementById('stats-revenue').innerText = systemOrders.filter(o=>o.status==='paid').reduce((s,o)=>s+o.finalTotal,0).toFixed(0)+' ر.س';
-            active.forEach(o=>{
+            con.innerHTML = active.map(o=>{
                 let items=o.items.map(i=>`<div class="flex justify-between text-xs py-1 border-b last:border-0"><span>${i.qty}x ${i.name}</span><span class="font-bold">${(i.price*i.qty).toFixed(0)}</span></div>`).join('');
-                con.innerHTML+=`<div class="bg-white rounded-2xl shadow-lg border overflow-hidden flex flex-col"><div class="p-4 bg-slate-50 flex justify-between border-b"><div><h3 class="font-bold">طاولة ${o.table}</h3><span class="text-xs text-slate-400">#${o.id.toString().slice(-4)}</span></div><span class="px-2 py-1 rounded text-xs font-bold border ${o.status==='paid'?'bg-emerald-100 text-emerald-700':'bg-amber-50 text-amber-600'}">${o.status==='paid'?'مدفوع':'انتظار'}</span></div><div class="p-4 flex-1 overflow-y-auto max-h-40 space-y-1">${items}</div><div class="p-3 bg-slate-50 border-t flex gap-2"><button onclick="printKitchenTicket(${o.id})" class="flex-1 py-2 border rounded bg-white hover:bg-orange-50 text-orange-600 text-xs font-bold">مطبخ</button><button onclick="openPaymentModal(${o.id})" class="flex-1 py-2 border rounded bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold">دفع</button></div></div>`;
-            });
+                return `<div class="bg-white rounded-2xl shadow-lg border overflow-hidden flex flex-col"><div class="p-4 bg-slate-50 flex justify-between border-b"><div><h3 class="font-bold">طاولة ${o.table}</h3><span class="text-xs text-slate-400">#${o.id.toString().slice(-4)}</span></div><span class="px-2 py-1 rounded text-xs font-bold border ${o.status==='paid'?'bg-emerald-100 text-emerald-700':'bg-amber-50 text-amber-600'}">${o.status==='paid'?'مدفوع':'انتظار'}</span></div><div class="p-4 flex-1 overflow-y-auto max-h-40 space-y-1">${items}</div><div class="p-3 bg-slate-50 border-t flex gap-2"><button onclick="printKitchenTicket(${o.id})" class="flex-1 py-2 border rounded bg-white hover:bg-orange-50 text-orange-600 text-xs font-bold">مطبخ</button><button onclick="openPaymentModal(${o.id})" class="flex-1 py-2 border rounded bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold">دفع</button></div></div>`;
+            }).join('');
         }
         function renderDeliveryOrders() {
             const prep=document.getElementById('delivery-prep'), out=document.getElementById('delivery-out'), done=document.getElementById('delivery-done');
             prep.innerHTML=''; out.innerHTML=''; done.innerHTML='';
             const ords = systemOrders.filter(o=>o.type==='delivery'&&!o.isCancelled);
             let c={preparing:0,out:0,delivered:0};
-            ords.forEach(o=>{ c[o.deliveryStatus]++; const card=createDelCard(o); if(o.deliveryStatus==='out')out.appendChild(card); else if(o.deliveryStatus==='delivered')done.appendChild(card); else prep.appendChild(card); });
+            ords.forEach(o=>{ 
+                if(c[o.deliveryStatus] !== undefined) c[o.deliveryStatus]++; 
+                const card=createDelCard(o); 
+                if(o.deliveryStatus==='out')out.appendChild(card); 
+                else if(o.deliveryStatus==='delivered')done.appendChild(card); 
+                else prep.appendChild(card); 
+            });
             document.getElementById('count-prep').innerText=c.preparing; document.getElementById('count-out').innerText=c.out; document.getElementById('count-done').innerText=c.delivered;
         }
         function createDelCard(o) {
@@ -709,38 +1087,305 @@
             d.innerHTML=`<div class="flex justify-between font-bold mb-1"><span>${o.customer.name}</span><span>#${o.id.toString().slice(-4)}</span></div><div class="text-xs text-slate-500 mb-2">${o.customer.phone}<br>${o.customer.address}</div><div class="font-bold text-right">${o.finalTotal.toFixed(2)} ر.س</div>${btn}<div class="mt-2 flex gap-1"><button onclick="printInvoice(${o.id})" class="flex-1 bg-white border text-xs py-1 rounded">فاتورة</button>${o.status!=='paid'?`<button onclick="openPaymentModal(${o.id})" class="flex-1 bg-sky-100 text-sky-700 text-xs py-1 rounded">دفع</button>`:'<span class="flex-1 text-center text-xs text-green-600 font-bold py-1">مدفوع</span>'}</div>`;
             return d;
         }
-        function updDel(id,s) { const o=systemOrders.find(x=>x.id===id); if(o){o.deliveryStatus=s; renderDeliveryOrders();} }
+        function updDel(id,s) { const o=systemOrders.find(x=>x.id===id); if(o){o.deliveryStatus=s; saveData(); renderDeliveryOrders();} }
         function renderTransactions() { document.getElementById('transactions-table-body').innerHTML = systemOrders.map(o=>`<tr class="bg-white border-b hover:bg-slate-50 ${o.isCancelled?'opacity-50':''}"><td class="px-6 py-4 font-bold">#${o.id.toString().slice(-4)}</td><td class="px-6 py-4">${o.type==='delivery'?'دليفري':`طاولة ${o.table}`}</td><td class="px-6 py-4">${o.time}</td><td class="px-6 py-4 font-bold">${o.finalTotal.toFixed(2)}</td><td class="px-6 py-4">${o.isCancelled?'ملغاة':(o.status==='paid'?'مدفوعة':'معلقة')}</td><td class="px-6 py-4 text-center">${!o.isCancelled?`<button onclick="cancelOrder(${o.id})" class="text-red-500 text-xs border border-red-200 px-3 py-1 rounded">إلغاء</button>`:'-'}</td></tr>`).join(''); }
-        function cancelOrder(id) { if(confirm('إلغاء؟')) { const o=systemOrders.find(x=>x.id===id); if(o){o.isCancelled=true; o.status='cancelled'; renderTransactions();} } }
+        function cancelOrder(id) { if(confirm('إلغاء؟')) { const o=systemOrders.find(x=>x.id===id); if(o){o.isCancelled=true; o.status='cancelled'; saveData(); renderTransactions();} } }
+        
+        // --- REPORTS & FINANCIALS ---
         function renderReports() {
             const v = systemOrders.filter(o=>!o.isCancelled);
-            document.getElementById('report-total-sales').innerText = v.reduce((s,o)=>s+o.finalTotal,0).toFixed(2)+' ر.س';
+            const totalSales = v.reduce((s,o)=>s+o.finalTotal,0);
+            
+            // Calculate COGS (Cost of Goods Sold)
+            let totalCOGS = 0;
+            v.forEach(o => {
+                o.items.forEach(i => {
+                    const item = menuItems.find(m => m.id === i.id);
+                    if(item) totalCOGS += (item.cost * i.qty);
+                });
+            });
+
+            // Calculate Expenses
+            const totalExpenses = expenses.reduce((s,e) => s + e.amount, 0);
+
+            // Net Profit
+            const netProfit = totalSales - totalCOGS - totalExpenses;
+
+            document.getElementById('report-total-sales').innerText = totalSales.toFixed(2)+' ر.س';
+            document.getElementById('report-cogs').innerText = totalCOGS.toFixed(2)+' ر.س';
+            document.getElementById('report-expenses').innerText = totalExpenses.toFixed(2)+' ر.س';
+            document.getElementById('report-net-profit').innerText = netProfit.toFixed(2)+' ر.س';
+            document.getElementById('report-net-profit').className = `text-2xl font-black mt-2 ${netProfit >= 0 ? 'text-purple-700' : 'text-red-600'}`;
+
             document.getElementById('report-total-orders').innerText = v.length;
             document.getElementById('report-cancelled').innerText = systemOrders.filter(o=>o.isCancelled).length;
-            let c={fish:0,shrimp:0,sides:0,drinks:0}; v.forEach(o=>o.items.forEach(i=>c[i.category]+=i.qty));
+            
+            // Stock Value
+            const stockVal = menuItems.reduce((s,i) => s + (i.stockQty * i.cost), 0);
+            document.getElementById('report-stock-value').innerText = stockVal.toFixed(2) + ' ر.س';
+
+            let c={}; 
+            v.forEach(o=>o.items.forEach(i=> { c[i.category] = (c[i.category]||0) + i.qty; }));
             const t = Object.values(c).reduce((a,b)=>a+b,0)||1;
-            document.getElementById('category-bars').innerHTML = `<div><div class="flex justify-between text-sm font-bold"><span>أسماك</span><span>${(c.fish/t*100).toFixed(1)}%</span></div><div class="w-full bg-slate-100 h-3 rounded-full"><div class="bg-blue-500 h-3 rounded-full" style="width:${c.fish/t*100}%"></div></div></div>`;
+            
+            const catNames = {fish:'أسماك', shrimp:'جمبري', sides:'جانبي', drinks:'مشروبات'};
+            document.getElementById('category-bars').innerHTML = Object.keys(c).map(cat => {
+                const pct = (c[cat]/t*100).toFixed(1);
+                const name = catNames[cat] || cat;
+                return `<div><div class="flex justify-between text-sm font-bold"><span>${name}</span><span>${pct}%</span></div><div class="w-full bg-slate-100 h-3 rounded-full mt-1"><div class="bg-sky-500 h-3 rounded-full" style="width:${pct}%"></div></div></div>`;
+            }).join('');
         }
-        function renderAdminTable() { document.getElementById('admin-table-body').innerHTML = menuItems.map(i=>`<tr class="bg-white border-b"><td class="px-6 py-4 font-bold">${i.name}</td><td class="px-6 py-4">${i.category}</td><td class="px-6 py-4"><input type="number" value="${i.price}" onchange="updatePrice(${i.id},this.value)" class="w-20 border rounded text-center"></td><td class="px-6 py-4"><input type="checkbox" ${i.inStock?'checked':''} onchange="toggleStock(${i.id})"></td><td class="px-6 py-4 text-center"><i class="fas fa-save text-sky-600"></i></td></tr>`).join(''); }
-        function updatePrice(id,p) { const i=menuItems.find(x=>x.id===id); if(i) i.price=parseFloat(p); }
-        function toggleStock(id) { const i=menuItems.find(x=>x.id===id); if(i) i.inStock=!i.inStock; }
-        function openAddItemModal() { document.getElementById('new-item-name').value=''; document.getElementById('add-item-modal').classList.remove('hidden'); }
+
+        // --- INVENTORY & PURCHASES ---
+        function switchInventoryTab(tab) {
+            document.getElementById('inv-content-stock').classList.add('hidden');
+            document.getElementById('inv-content-purchases').classList.add('hidden');
+            document.getElementById('inv-content-movements').classList.add('hidden');
+            document.getElementById('tab-inv-stock').className = "inv-tab-btn px-4 py-2 font-bold text-slate-500 hover:text-sky-600";
+            document.getElementById('tab-inv-purchases').className = "inv-tab-btn px-4 py-2 font-bold text-slate-500 hover:text-sky-600";
+            document.getElementById('tab-inv-movements').className = "inv-tab-btn px-4 py-2 font-bold text-slate-500 hover:text-sky-600";
+            
+            document.getElementById(`inv-content-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-inv-${tab}`).className = "inv-tab-btn px-4 py-2 font-bold text-sky-600 border-b-2 border-sky-600";
+        }
+        function renderInventory() {
+            // Stock Table
+            document.getElementById('inventory-stock-body').innerHTML = menuItems.map(i => {
+                const val = i.stockQty * i.cost;
+                const status = i.stockQty < 10 ? '<span class="text-red-500 font-bold">منخفض</span>' : '<span class="text-green-500 font-bold">جيد</span>';
+                return `<tr class="bg-white border-b"><td class="px-6 py-4 font-bold">${i.name}</td><td class="px-6 py-4 font-bold text-sky-700">${i.stockQty}</td><td class="px-6 py-4">${i.cost}</td><td class="px-6 py-4">${i.price}</td><td class="px-6 py-4 font-bold">${val.toFixed(0)}</td><td class="px-6 py-4">${status}</td><td class="px-6 py-4 text-center"><button onclick="openStockAdjustModal(${i.id})" class="text-sky-600 hover:text-sky-800"><i class="fas fa-edit"></i></button></td></tr>`;
+            }).join('');
+            // Purchases Table
+            document.getElementById('inventory-purchases-body').innerHTML = purchases.map(p => `
+                <tr class="bg-white border-b">
+                    <td class="px-6 py-4 font-bold">#${p.id}</td>
+                    <td class="px-6 py-4">${p.date}</td>
+                    <td class="px-6 py-4">${p.supplier}</td>
+                    <td class="px-6 py-4 font-bold text-emerald-600">${p.total.toFixed(2)}</td>
+                    <td class="px-6 py-4 text-xs">${p.notes}</td>
+                    <td class="px-6 py-4 text-xs text-slate-500">${p.items.length} أصناف</td>
+                    <td class="px-6 py-4 text-center"><button onclick="deletePurchase(${p.id})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+            // Movements Table
+            document.getElementById('inventory-movements-body').innerHTML = stockMovements.map(m => `
+                <tr class="bg-white border-b"><td class="px-6 py-4 text-xs">${m.date}</td><td class="px-6 py-4 font-bold">${m.itemName}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold ${m.qty>0?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}">${m.type==='sale'?'بيع':(m.type==='purchase'?'شراء':'تعديل')}</span></td><td class="px-6 py-4 font-bold" dir="ltr">${m.qty>0?'+':''}${m.qty}</td><td class="px-6 py-4 text-xs">${m.user}</td><td class="px-6 py-4 text-xs text-slate-500">${m.note}</td></tr>
+            `).join('');
+        }
+        function openAddPurchaseModal() {
+            tempPurchaseItems = [];
+            document.getElementById('pur-supplier').value = '';
+            document.getElementById('pur-date').valueAsDate = new Date();
+            document.getElementById('pur-notes').value = '';
+            document.getElementById('pur-item-select').innerHTML = menuItems.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+            renderPurchaseItems();
+            document.getElementById('add-purchase-modal').classList.remove('hidden');
+        }
+        function addPurchaseItemRow() {
+            const id = parseInt(document.getElementById('pur-item-select').value);
+            const qty = parseFloat(document.getElementById('pur-item-qty').value);
+            const cost = parseFloat(document.getElementById('pur-item-cost').value);
+            if(qty > 0 && cost >= 0 && id) {
+                const item = menuItems.find(i => i.id === id);
+                if(item) {
+                    tempPurchaseItems.push({ id, name: item.name, qty, cost, total: qty*cost });
+                    renderPurchaseItems();
+                    document.getElementById('pur-item-qty').value = '';
+                    document.getElementById('pur-item-cost').value = '';
+                }
+            }
+        }
+        function renderPurchaseItems() {
+            const total = tempPurchaseItems.reduce((s,i)=>s+i.total,0);
+            document.getElementById('pur-total-display').innerText = total.toFixed(2);
+            document.getElementById('pur-items-list').innerHTML = tempPurchaseItems.map((i,idx) => `<tr class="border-b"><td class="p-2">${i.name}</td><td class="p-2">${i.qty}</td><td class="p-2">${i.cost}</td><td class="p-2">${i.total}</td><td class="p-2"><button onclick="tempPurchaseItems.splice(${idx},1);renderPurchaseItems()" class="text-red-500"><i class="fas fa-times"></i></button></td></tr>`).join('');
+        }
+        function savePurchase() {
+            if(tempPurchaseItems.length === 0) return;
+            const total = tempPurchaseItems.reduce((s,i)=>s+i.total,0);
+            const pur = {
+                id: Date.now(),
+                supplier: document.getElementById('pur-supplier').value || 'مورد عام',
+                date: document.getElementById('pur-date').value,
+                items: [...tempPurchaseItems],
+                total: total,
+                notes: document.getElementById('pur-notes').value
+            };
+            // Update Stock & Cost
+            pur.items.forEach(pi => {
+                const item = menuItems.find(m => m.id === pi.id);
+                if(item) {
+                    // Weighted Average Cost Calculation
+                    const oldVal = item.stockQty * item.cost;
+                    const newVal = pi.qty * pi.cost;
+                    item.stockQty += pi.qty;
+                    item.cost = (oldVal + newVal) / item.stockQty; // Update cost average
+                    logStockMovement(item.id, item.name, pi.qty, 'purchase', `فاتورة #${pur.id}`);
+                }
+            });
+            purchases.unshift(pur);
+            saveData();
+            closeModal('add-purchase-modal');
+            renderInventory();
+            showNotification('تم حفظ فاتورة المشتريات وتحديث المخزون');
+        }
+
+        function deletePurchase(id) {
+            if(confirm('حذف الفاتورة؟ لن يتم التراجع عن تأثير المخزون تلقائياً.')) { purchases = purchases.filter(p => p.id !== id); saveData(); renderInventory(); }
+        }
+        
+        function logStockMovement(itemId, itemName, qty, type, note) {
+            stockMovements.unshift({ id: Date.now(), date: new Date().toLocaleString('ar-EG'), itemId, itemName, qty, type, note, user: currentUser ? currentUser.name : 'System' });
+        }
+
+        function openStockAdjustModal(id) {
+            const item = menuItems.find(i => i.id === id);
+            if(!item) return;
+            currentAdjustItemId = id;
+            document.getElementById('adjust-item-name').innerText = `تعديل مخزون: ${item.name}`;
+            document.getElementById('adjust-qty').value = '';
+            document.getElementById('stock-adjust-modal').classList.remove('hidden');
+        }
+        function saveStockAdjustment() {
+            const qty = parseFloat(document.getElementById('adjust-qty').value);
+            const reason = document.getElementById('adjust-reason').value;
+            if(qty === 0 || isNaN(qty)) return;
+            const item = menuItems.find(i => i.id === currentAdjustItemId);
+            if(item) {
+                item.stockQty += qty;
+                logStockMovement(item.id, item.name, qty, 'adjustment', reason);
+                saveData();
+                closeModal('stock-adjust-modal');
+                renderInventory();
+                showNotification('تم تعديل المخزون');
+            }
+        }
+
+        // --- EXPENSES ---
+        function renderExpenses() {
+            document.getElementById('expenses-table-body').innerHTML = expenses.map((e, idx) => `
+                <tr class="bg-white border-b hover:bg-slate-50">
+                    <td class="px-6 py-4">${e.date}</td>
+                    <td class="px-6 py-4 font-bold text-slate-700">${getExpCatName(e.category)}</td>
+                    <td class="px-6 py-4 font-bold text-red-600">${e.amount.toFixed(2)}</td>
+                    <td class="px-6 py-4 text-sm">${e.note}</td>
+                    <td class="px-6 py-4 text-xs text-slate-400">${e.user}</td>
+                    <td class="px-6 py-4 text-center flex justify-center gap-3">
+                        <button onclick="editExpense(${e.id})" class="text-sky-500 hover:text-sky-700"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteExpense(${e.id})" class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        function getExpCatName(c) { const m={rent:'إيجار',wages:'رواتب',electricity:'كهرباء',supplies:'مستلزمات',maintenance:'صيانة',marketing:'تسويق',other:'أخرى'}; return m[c]||c; }
+        function openAddExpenseModal() { 
+            editingExpenseId = null;
+            document.getElementById('modal-expense-title').innerText = 'تسجيل مصروف جديد';
+            document.getElementById('exp-amount').value=''; document.getElementById('exp-note').value=''; 
+            document.getElementById('add-expense-modal').classList.remove('hidden'); 
+        }
+        function editExpense(id) {
+            const e = expenses.find(x => x.id === id);
+            if(!e) return;
+            editingExpenseId = id;
+            document.getElementById('modal-expense-title').innerText = 'تعديل مصروف';
+            document.getElementById('exp-category').value = e.category;
+            document.getElementById('exp-amount').value = e.amount;
+            document.getElementById('exp-note').value = e.note;
+            document.getElementById('add-expense-modal').classList.remove('hidden');
+        }
+        function saveExpense() {
+            const amt = parseFloat(document.getElementById('exp-amount').value);
+            if(!amt) return;
+            
+            if(editingExpenseId) {
+                const e = expenses.find(x => x.id === editingExpenseId);
+                if(e) { e.category = document.getElementById('exp-category').value; e.amount = amt; e.note = document.getElementById('exp-note').value; }
+                showNotification('تم تعديل المصروف');
+            } else {
+                expenses.unshift({
+                    id: Date.now(),
+                    date: new Date().toLocaleDateString('ar-EG'),
+                    category: document.getElementById('exp-category').value,
+                    amount: amt,
+                    note: document.getElementById('exp-note').value,
+                    user: currentUser.name
+                });
+                showNotification('تم تسجيل المصروف');
+            }
+            saveData();
+            closeModal('add-expense-modal');
+            renderExpenses();
+        }
+        function deleteExpense(id) { if(confirm('حذف المصروف؟')) { expenses = expenses.filter(e => e.id !== id); saveData(); renderExpenses(); } }
+
+        // --- ADMIN UPDATES ---
+        function renderAdminTable() { document.getElementById('admin-table-body').innerHTML = menuItems.map(i=>`<tr class="bg-white border-b"><td class="px-6 py-4 font-bold">${i.name}</td><td class="px-6 py-4">${i.category}</td><td class="px-6 py-4"><input type="number" value="${i.price}" onchange="updatePrice(${i.id},this.value)" class="w-20 border rounded text-center"></td><td class="px-6 py-4"><input type="number" value="${i.cost.toFixed(2)}" onchange="updateCost(${i.id},this.value)" class="w-20 border rounded text-center bg-slate-50"></td><td class="px-6 py-4"><input type="checkbox" ${i.inStock?'checked':''} onchange="toggleStock(${i.id})"></td><td class="px-6 py-4 text-center flex justify-center gap-3"><button onclick="editItem(${i.id})" class="text-sky-600 hover:text-sky-800"><i class="fas fa-edit"></i></button><button onclick="deleteItem(${i.id})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button></td></tr>`).join(''); }
+        function updatePrice(id,p) { const i=menuItems.find(x=>x.id===id); if(i) { i.price=parseFloat(p); saveData(); } }
+        function updateCost(id,c) { const i=menuItems.find(x=>x.id===id); if(i) { i.cost=parseFloat(c); saveData(); } }
+        function toggleStock(id) { const i=menuItems.find(x=>x.id===id); if(i) { i.inStock=!i.inStock; saveData(); } }
+        
+        function openAddItemModal() { 
+            editingItemId = null;
+            document.getElementById('modal-item-title').innerText = 'إضافة صنف';
+            document.getElementById('new-item-name').value=''; 
+            document.getElementById('new-item-price').value='';
+            document.getElementById('new-item-cost').value='';
+            document.getElementById('add-item-modal').classList.remove('hidden'); 
+        }
+        
+        function editItem(id) {
+            const i = menuItems.find(x => x.id === id);
+            if(!i) return;
+            editingItemId = id;
+            document.getElementById('modal-item-title').innerText = 'تعديل صنف';
+            document.getElementById('new-item-name').value = i.name;
+            document.getElementById('new-item-price').value = i.price;
+            document.getElementById('new-item-cost').value = i.cost;
+            document.getElementById('new-item-type').value = i.type;
+            document.getElementById('new-item-category').value = i.category;
+            document.getElementById('add-item-modal').classList.remove('hidden');
+        }
+
         function saveNewItem() { 
-            const n=document.getElementById('new-item-name').value, p=document.getElementById('new-item-price').value;
-            if(n&&p) { menuItems.push({id:Date.now(), name:n, price:parseFloat(p), category:document.getElementById('new-item-category').value, type:document.getElementById('new-item-type').value, icon:'fa-circle', color:'text-gray-500', inStock:true}); closeModal('add-item-modal'); renderAdminTable(); } 
+            const n=document.getElementById('new-item-name').value, p=document.getElementById('new-item-price').value, c=document.getElementById('new-item-cost').value;
+            if(n&&p) { 
+                if(editingItemId) {
+                    const i = menuItems.find(x => x.id === editingItemId);
+                    if(i) {
+                        i.name = n; i.price = parseFloat(p); i.cost = parseFloat(c)||0;
+                        i.category = document.getElementById('new-item-category').value;
+                        i.type = document.getElementById('new-item-type').value;
+                    }
+                    showNotification('تم تحديث الصنف');
+                } else {
+                    menuItems.push({id:Date.now(), name:n, price:parseFloat(p), cost:parseFloat(c)||0, stockQty:0, category:document.getElementById('new-item-category').value, type:document.getElementById('new-item-type').value, icon:'fa-circle', color:'text-gray-500', inStock:true}); 
+                    showNotification('تم إضافة الصنف');
+                }
+                saveData(); closeModal('add-item-modal'); renderAdminTable(); 
+            } 
+        }
+
+        function deleteItem(id) {
+            if(confirm('هل أنت متأكد من حذف هذا الصنف؟')) {
+                menuItems = menuItems.filter(i => i.id !== id);
+                saveData();
+                renderAdminTable();
+                renderMenu('all'); // Update menu view as well
+            }
         }
         
         // Payment & Print Utils (Condensed)
         function openPaymentModal(id){currentPayOrderId=id; const o=systemOrders.find(x=>x.id===id); if(o){document.getElementById('pay-subtotal').innerText=o.subtotal.toFixed(2); document.getElementById('pay-tax').innerText=o.tax.toFixed(2); updatePaymentTotals(); document.getElementById('payment-modal').classList.remove('hidden');}}
         function updatePaymentTotals(){const o=systemOrders.find(x=>x.id===currentPayOrderId); if(!o)return; const sub=o.subtotal+o.tax, d=sub*(parseInt(document.getElementById('pay-discount-pct').value)||0)/100, f=sub-d; document.getElementById('pay-final-total').innerText=f.toFixed(2); if(document.getElementById('split-check').checked) document.getElementById('split-amount').innerText=`(${(f/(parseInt(document.getElementById('split-count').value)||1)).toFixed(2)})`;}
         function toggleSplit() { const s=document.getElementById('split-check').checked; document.getElementById('split-count').classList.toggle('hidden',!s); document.getElementById('split-amount').classList.toggle('hidden',!s); if(s)updatePaymentTotals(); }
-        function processPayment(m){const o=systemOrders.find(x=>x.id===currentPayOrderId); if(o){o.status='paid';o.finalTotal=parseFloat(document.getElementById('pay-final-total').innerText); closeModal('payment-modal'); if(!document.getElementById('system-view').classList.contains('hidden'))renderSystemOrders(); if(!document.getElementById('delivery-view').classList.contains('hidden'))renderDeliveryOrders(); printInvoice(o.id);}}
+        function processPayment(m){const o=systemOrders.find(x=>x.id===currentPayOrderId); if(o){o.status='paid';o.finalTotal=parseFloat(document.getElementById('pay-final-total').innerText); saveData(); closeModal('payment-modal'); if(!document.getElementById('system-view').classList.contains('hidden'))renderSystemOrders(); if(!document.getElementById('delivery-view').classList.contains('hidden'))renderDeliveryOrders(); printInvoice(o.id);}}
         function printKitchenTicket(id){const o=systemOrders.find(x=>x.id===id); if(!o)return; const h=o.items.map(i=>`<div>${i.qty}x ${i.name} ${i.method||''}</div>`).join(''); document.getElementById('print-area').innerHTML=`<div style="width:80mm;text-align:center"><h2>مطبخ</h2><h1>${o.table}</h1>${h}</div>`; window.print();}
         function printInvoice(id){const o=systemOrders.find(x=>x.id===id); if(!o)return; const h=o.items.map(i=>`<tr><td>${i.name}</td><td>${i.qty}</td><td>${(i.price*i.qty).toFixed(2)}</td></tr>`).join(''); document.getElementById('print-area').innerHTML=`<div style="width:80mm;text-align:center;font-family:'Cairo'"><h2>مطعم حكاية</h2><p>#${o.id.toString().slice(-4)}</p><table>${h}</table><h3>${o.finalTotal.toFixed(2)}</h3></div>`; window.print();}
         function showNotification(m,t='success'){const e=document.getElementById('notification'); document.getElementById('notif-text').innerText=m; e.classList.remove('translate-y-32'); setTimeout(()=>e.classList.add('translate-y-32'),3000);}
         async function callGemini(p){try{const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:p}]}]})});const d=await r.json();return d.candidates[0].content.parts[0].text;}catch(e){return null;}}
-        async function getSmartSuggestions(){if(cart.length===0)return showNotification('فارغة','error');document.getElementById('ai-modal').classList.remove('hidden'); document.getElementById('ai-content').innerText='جاري التحليل...'; const res=await callGemini(`Suggest 2 items from ${JSON.stringify(menuItems.map(i=>i.name))} not in ${cart.map(i=>i.name)}. JSON array.`); if(res) document.getElementById('ai-content').innerText=res; }
-        async function generateMarketingPost(){document.getElementById('marketing-modal').classList.remove('hidden'); document.getElementById('marketing-content').innerText='جاري التوليد...'; const res=await callGemini('Write arabic post for seafood restaurant'); if(res) document.getElementById('marketing-content').innerText=res;}
+        async function getSmartSuggestions(){if(cart.length===0)return showNotification('فارغة','error');document.getElementById('ai-modal').classList.remove('hidden'); document.getElementById('ai-content').innerText='جاري التحليل...'; const res=await callGemini(`Suggest 2 items from ${JSON.stringify(menuItems.map(i=>i.name))} not in ${cart.map(i=>i.name)}. JSON array.`); if(res) document.getElementById('ai-content').innerText=res; else document.getElementById('ai-content').innerText='فشل الاتصال بالخدمة الذكية';}
+        async function generateMarketingPost(){document.getElementById('marketing-modal').classList.remove('hidden'); document.getElementById('marketing-content').innerText='جاري التوليد...'; const res=await callGemini('Write arabic post for seafood restaurant'); if(res) document.getElementById('marketing-content').innerText=res; else document.getElementById('marketing-content').innerText='فشل الاتصال بالخدمة الذكية';}
         function closeAiModal(){document.getElementById('ai-modal').classList.add('hidden');}
         function copyToClipboard(){navigator.clipboard.writeText(document.getElementById('marketing-content').innerText); showNotification('تم النسخ');}
     </script>
