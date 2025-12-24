@@ -101,9 +101,7 @@
             <div class="absolute bottom-0 left-0 w-32 h-32 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 translate-y-1/2 -translate-x-1/2"></div>
             
             <div class="text-center mb-8 relative z-10">
-                <div class="w-20 h-20 bg-gradient-to-br from-sky-500 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4 transform rotate-3">
-                    <i class="fas fa-fish text-4xl text-white"></i>
-                </div>
+                <img src="logo.jpeg" class="w-20 h-20 rounded-2xl shadow-lg mx-auto mb-4 transform rotate-3 object-cover" alt="شعار المطعم">
                 <h1 class="text-3xl font-black text-slate-800">مطعم حكاية</h1>
                 <p class="text-slate-500">نظام إدارة المطاعم الذكي</p>
             </div>
@@ -143,9 +141,7 @@
         <nav class="bg-slate-900 text-white p-3 shadow-xl z-50 relative">
             <div class="container mx-auto flex justify-between items-center relative z-10">
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-fish text-xl text-white"></i>
-                    </div>
+                    <img src="logo.jpeg" class="w-10 h-10 rounded-xl shadow-lg object-cover" alt="شعار المطعم">
                     <div>
                         <h1 class="text-xl font-black tracking-tight">مطعم حكاية</h1>
                         <p class="text-[10px] text-sky-200 font-medium" id="user-display-name">مرحباً، المستخدم</p>
@@ -305,7 +301,10 @@
                 <div class="p-8 max-w-6xl mx-auto w-full h-full overflow-y-auto">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-3xl font-black text-slate-800"><i class="fas fa-chart-pie text-purple-500 ml-2"></i>التقارير المالية والتحليلات</h2>
-                        <button onclick="renderReports()" class="bg-white border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-50"><i class="fas fa-sync-alt ml-2"></i>تحديث</button>
+                        <div class="flex gap-2">
+                            <button onclick="printReport()" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-900"><i class="fas fa-print ml-2"></i>طباعة التقرير</button>
+                            <button onclick="renderReports()" class="bg-white border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-50"><i class="fas fa-sync-alt ml-2"></i>تحديث</button>
+                        </div>
                     </div>
                     
                     <!-- Financial Summary Cards -->
@@ -342,6 +341,22 @@
                                 <div class="flex justify-between items-center"><span class="text-slate-600 font-bold">قيمة المخزون الحالي</span><span id="report-stock-value" class="font-black text-slate-800">0 ر.س</span></div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Full Inventory Report Table -->
+                    <div class="bg-white rounded-2xl shadow overflow-hidden mb-8">
+                        <div class="p-6 border-b border-slate-100">
+                            <h3 class="font-bold text-lg text-slate-800">جرد المخزون الشامل</h3>
+                            <p class="text-sm text-slate-500">تفاصيل الكميات والقيم الحالية لجميع الأصناف</p>
+                        </div>
+                        <table class="w-full text-sm text-right text-slate-600">
+                            <thead class="bg-slate-50 text-slate-700 uppercase font-bold">
+                                <tr>
+                                    <th class="px-6 py-4">الصنف</th><th class="px-6 py-4">الفئة</th><th class="px-6 py-4">الكمية</th><th class="px-6 py-4">التكلفة</th><th class="px-6 py-4">القيمة</th><th class="px-6 py-4">الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-inventory-body"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -1020,6 +1035,41 @@
                 const name = catNames[cat] || cat;
                 return `<div><div class="flex justify-between text-sm font-bold"><span>${name}</span><span>${pct}%</span></div><div class="w-full bg-slate-100 h-3 rounded-full mt-1"><div class="bg-sky-500 h-3 rounded-full" style="width:${pct}%"></div></div></div>`;
             }).join('');
+
+            // Render Inventory Report Table
+            const invBody = document.getElementById('report-inventory-body');
+            if(invBody) {
+                let totalVal = 0;
+                invBody.innerHTML = menuItems.map(i => {
+                    const val = i.stockQty * i.cost;
+                    totalVal += val;
+                    const status = i.stockQty < 10 ? '<span class="text-red-500 font-bold">منخفض</span>' : '<span class="text-emerald-600 font-bold">جيد</span>';
+                    return `<tr class="border-b hover:bg-slate-50">
+                        <td class="px-6 py-4 font-bold text-slate-800">${i.name}</td><td class="px-6 py-4">${catNames[i.category]||i.category}</td><td class="px-6 py-4 font-bold" dir="ltr">${i.stockQty}</td><td class="px-6 py-4">${i.cost.toFixed(2)}</td><td class="px-6 py-4 font-bold">${val.toFixed(2)}</td><td class="px-6 py-4">${status}</td>
+                    </tr>`;
+                }).join('') + `
+                    <tr class="bg-slate-100 font-black text-slate-800"><td class="px-6 py-4" colspan="4">الإجمالي الكلي للمخزون</td><td class="px-6 py-4 text-emerald-700">${totalVal.toFixed(2)} ر.س</td><td></td></tr>
+                `;
+            }
+        }
+
+        function printReport() {
+            const content = document.getElementById('reports-view').querySelector('.overflow-y-auto').innerHTML;
+            // Strip buttons
+            const div = document.createElement('div');
+            div.innerHTML = content;
+            div.querySelectorAll('button').forEach(b => b.remove());
+            
+            document.getElementById('print-area').innerHTML = `
+                <div style="padding:20px; direction:rtl; font-family:'Cairo'">
+                    <div style="text-align:center; margin-bottom:30px; border-bottom:2px solid #eee; padding-bottom:20px">
+                        <h1 style="font-size:24px; font-weight:900; margin-bottom:10px">تقرير المطعم الشامل</h1>
+                        <p style="color:#666">تاريخ الإصدار: ${new Date().toLocaleString('ar-EG')}</p>
+                    </div>
+                    ${div.innerHTML}
+                </div>
+            `;
+            window.print();
         }
 
         // --- INVENTORY & PURCHASES ---
@@ -1267,7 +1317,35 @@
         function toggleSplit() { const s=document.getElementById('split-check').checked; document.getElementById('split-count').classList.toggle('hidden',!s); document.getElementById('split-amount').classList.toggle('hidden',!s); if(s)updatePaymentTotals(); }
         function processPayment(m){const o=systemOrders.find(x=>x.id===currentPayOrderId); if(o){o.status='paid';o.finalTotal=parseFloat(document.getElementById('pay-final-total').innerText); saveData(); closeModal('payment-modal'); if(!document.getElementById('system-view').classList.contains('hidden'))renderSystemOrders(); if(!document.getElementById('delivery-view').classList.contains('hidden'))renderDeliveryOrders(); printInvoice(o.id);}}
         function printKitchenTicket(id){const o=systemOrders.find(x=>x.id===id); if(!o)return; const h=o.items.map(i=>`<div>${i.qty}x ${i.name} ${i.method||''}</div>`).join(''); document.getElementById('print-area').innerHTML=`<div style="width:80mm;text-align:center"><h2>مطبخ</h2><h1>${o.table}</h1>${h}</div>`; window.print();}
-        function printInvoice(id){const o=systemOrders.find(x=>x.id===id); if(!o)return; const h=o.items.map(i=>`<tr><td>${i.name}</td><td>${i.qty}</td><td>${(i.price*i.qty).toFixed(2)}</td></tr>`).join(''); document.getElementById('print-area').innerHTML=`<div style="width:80mm;text-align:center;font-family:'Cairo'"><h2>مطعم حكاية</h2><p>#${o.id.toString().slice(-4)}</p><table>${h}</table><h3>${o.finalTotal.toFixed(2)}</h3></div>`; window.print();}
+        function printInvoice(id){
+            const o=systemOrders.find(x=>x.id===id); if(!o)return; 
+            const h=o.items.map(i=>`<tr style="border-bottom:1px dashed #ddd"><td style="text-align:right;padding:4px">${i.name}</td><td style="text-align:center;padding:4px">${i.qty}</td><td style="text-align:left;padding:4px">${(i.price*i.qty).toFixed(2)}</td></tr>`).join(''); 
+            document.getElementById('print-area').innerHTML=`
+                <div style="width:80mm;margin:0 auto;padding:5px;font-family:'Cairo';direction:rtl;color:#000">
+                    <div style="text-align:center;margin-bottom:10px">
+                        <img src="logo.jpeg" style="width:50px;height:50px;margin:0 auto;display:block;border-radius:8px;margin-bottom:5px;filter:grayscale(100%)">
+                        <h2 style="font-size:18px;font-weight:900;margin:0">مطعم حكاية</h2>
+                        <p style="font-size:10px;margin:0">أشهى المأكولات البحرية</p>
+                    </div>
+                    <div style="border-bottom:2px dashed #000;margin-bottom:10px"></div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:bold;margin-bottom:5px">
+                        <span>فاتورة #${o.id.toString().slice(-4)}</span>
+                        <span>${o.time}</span>
+                    </div>
+                    <div style="font-size:12px;margin-bottom:10px">النوع: ${o.type==='delivery'?'توصيل':`طاولة ${o.table}`}</div>
+                    <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:10px">
+                        <thead><tr style="border-bottom:2px solid #000"><th style="text-align:right;padding:4px">الصنف</th><th style="text-align:center;padding:4px">العدد</th><th style="text-align:left;padding:4px">السعر</th></tr></thead>
+                        <tbody>${h}</tbody>
+                    </table>
+                    <div style="border-top:2px dashed #000;padding-top:5px;margin-top:5px">
+                        <div style="display:flex;justify-content:space-between;font-size:12px"><span>المجموع</span><span>${o.subtotal.toFixed(2)}</span></div>
+                        <div style="display:flex;justify-content:space-between;font-size:12px"><span>الضريبة (15%)</span><span>${o.tax.toFixed(2)}</span></div>
+                        <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:900;margin-top:5px"><span>الإجمالي</span><span>${o.finalTotal.toFixed(2)} ر.س</span></div>
+                    </div>
+                    <div style="text-align:center;margin-top:15px;font-size:10px;border-top:1px solid #eee;padding-top:5px"><p>شكراً لزيارتكم</p></div>
+                </div>`; 
+            window.print();
+        }
         function showNotification(m,t='success'){const e=document.getElementById('notification'); document.getElementById('notif-text').innerText=m; e.classList.remove('translate-y-32'); setTimeout(()=>e.classList.add('translate-y-32'),3000);}
         async function callGemini(p){try{const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:p}]}]})});const d=await r.json();return d.candidates[0].content.parts[0].text;}catch(e){return null;}}
         async function getSmartSuggestions(){if(cart.length===0)return showNotification('فارغة','error');document.getElementById('ai-modal').classList.remove('hidden'); document.getElementById('ai-content').innerText='جاري التحليل...'; const res=await callGemini(`Suggest 2 items from ${JSON.stringify(menuItems.map(i=>i.name))} not in ${cart.map(i=>i.name)}. JSON array.`); if(res) document.getElementById('ai-content').innerText=res; else document.getElementById('ai-content').innerText='فشل الاتصال بالخدمة الذكية';}
