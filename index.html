@@ -115,7 +115,7 @@
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                             <i class="fas fa-envelope text-slate-400"></i>
                         </div>
-                        <input type="email" id="login-email" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full pr-10 p-2.5" placeholder="name@hekaya.com" required>
+                        <input type="text" id="login-email" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full pr-10 p-2.5" placeholder="admin" required>
                     </div>
                 </div>
                 <div>
@@ -436,15 +436,6 @@
                         </div>
                     </div>
 
-                    <!-- Subscription Settings -->
-                    <div class="bg-white rounded-2xl shadow-md p-6 mb-8 border-r-4 border-purple-500">
-                        <h3 class="font-bold text-lg text-slate-800 mb-4 border-b pb-2">حالة الاشتراك</h3>
-                        <div class="flex items-center justify-between">
-                            <div><p class="font-bold text-slate-700" id="sub-status-text">جاري التحقق...</p><p class="text-xs text-slate-500" id="sub-expiry-text">ينتهي في: -</p></div>
-                            <div class="flex items-center gap-2"><input type="text" id="settings-sub-code" class="w-64 border rounded p-2 text-left text-xs font-mono" placeholder="أدخل كود التفعيل الجديد"><button onclick="updateSubscriptionFromSettings()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 font-bold text-sm">تجديد</button></div>
-                        </div>
-                    </div>
-
                     <!-- Users Management -->
                     <div class="bg-white rounded-2xl shadow-md p-6">
                         <div class="flex justify-between items-center mb-6">
@@ -546,31 +537,6 @@
         </div>
     </div>
 
-    <!-- SUBSCRIPTION LOCK MODAL -->
-    <div id="subscription-modal" class="fixed inset-0 bg-slate-900 z-[200] hidden flex items-center justify-center">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 text-center border-4 border-red-500 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-red-500"></div>
-            <i class="fas fa-lock text-6xl text-red-500 mb-6"></i>
-            <h2 class="text-2xl font-black text-slate-800 mb-2">النظام متوقف</h2>
-            <p class="text-slate-500 mb-6">انتهت صلاحية اشتراك النظام أو لم يتم تفعيله بعد.<br>يرجى التواصل مع الدعم الفني للحصول على كود التفعيل.</p>
-            
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 text-right">
-                <label class="block text-xs font-bold text-slate-700 mb-2">كود التفعيل</label>
-                <input type="text" id="activation-code-input" class="w-full border border-slate-300 rounded-lg p-3 text-center font-mono text-lg focus:ring-2 focus:ring-red-500 outline-none" placeholder="HEKAYA-...">
-            </div>
-            
-            <button onclick="activateSystem()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:scale-[1.02]">تفعيل النظام</button>
-            
-            <div class="mt-6 text-xs text-slate-400">
-                <p class="mb-2 font-bold">للحصول على كود التفعيل أو الدعم الفني:</p>
-                <div class="flex flex-col gap-2 items-center">
-                    <a href="tel:+201067765058" class="flex items-center gap-2 hover:text-slate-600 transition"><i class="fas fa-phone-alt"></i> 01067765058</a>
-                    <a href="https://wa.me/201067765058" target="_blank" class="flex items-center gap-2 text-green-600 hover:text-green-700 font-bold bg-green-50 px-3 py-1 rounded-full border border-green-200 transition"><i class="fab fa-whatsapp text-lg"></i> تواصل مباشرة عبر واتساب</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- ADD EXPENSE MODAL -->
     <div id="add-expense-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[75] hidden flex items-center justify-center">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
@@ -638,14 +604,14 @@
       // Your web app's Firebase configuration
       // For Firebase JS SDK v7.20.0 and later, measurementId is optional
       const firebaseConfig = {
-        apiKey: "AIzaSyBg30vbK9ayrQn35cohJXcBiwPzuxVIgc8",
-        authDomain: "crp1-51359.firebaseapp.com",
-        databaseURL: "https://crp1-51359-default-rtdb.firebaseio.com",
-        projectId: "crp1-51359",
-        storageBucket: "crp1-51359.firebasestorage.app",
-        messagingSenderId: "728709328234",
-        appId: "1:728709328234:web:a0f8e39a7d1210100b8913",
-        measurementId: "G-J8PHEN82ZW"
+        apiKey: "AIzaSyB36gkGkwPozuUYXd0lPRXC8ngGsISuL6s",
+        authDomain: "pos1-cfae7.firebaseapp.com",
+        databaseURL: "https://pos1-cfae7-default-rtdb.firebaseio.com",
+        projectId: "pos1-cfae7",
+        storageBucket: "pos1-cfae7.firebasestorage.app",
+        messagingSenderId: "1045358854978",
+        appId: "1:1045358854978:web:b610215efbbd7269cc7edb",
+        measurementId: "G-H2DGHXZMSG"
       };
 
       // Initialize Firebase
@@ -677,7 +643,7 @@
             { id: 12, name: "عصير ليمون", price: 12, cost: 4, stockQty: 100, category: "drinks", type: "unit", icon: "fa-glass-water", color: "text-green-500", inStock: true }
         ];
         const defaultUsers = [
-            { id: 1, name: "المدير العام", email: "admin@hekaya.com", pass: "123456", perms: ['waiter','system','delivery','transactions','reports','inventory','expenses','admin','settings'] },
+            { id: 1, name: "المدير العام", email: "admin", pass: "123", perms: ['waiter','system','delivery','transactions','reports','inventory','expenses','admin','settings'] },
             { id: 2, name: "نادل 1", email: "waiter@hekaya.com", pass: "123456", perms: ['waiter'] },
             { id: 3, name: "كاشير", email: "cashier@hekaya.com", pass: "123456", perms: ['system','transactions'] }
         ];
@@ -696,7 +662,6 @@
         let expenses = (JSON.parse(localStorage.getItem('pos_expenses')) || []).map(e => ({...e, id: e.id || Date.now() + Math.random()}));
         let purchases = JSON.parse(localStorage.getItem('pos_purchases')) || [];
         let stockMovements = JSON.parse(localStorage.getItem('pos_stockMovements')) || [];
-        let subscriptionCode = localStorage.getItem('pos_subscription_code') || '';
 
         let currentUser = null;
 
@@ -708,11 +673,10 @@
             localStorage.setItem('pos_expenses', JSON.stringify(expenses));
             localStorage.setItem('pos_purchases', JSON.stringify(purchases));
             localStorage.setItem('pos_stockMovements', JSON.stringify(stockMovements));
-            localStorage.setItem('pos_subscription_code', subscriptionCode);
             
             // Save to Firebase (Backup)
             if(window.firebaseDb && window.firebaseSet && window.firebaseRef) {
-                window.firebaseSet(window.firebaseRef(window.firebaseDb, 'backup'), {
+                window.firebaseSet(window.firebaseRef(window.firebaseDb, 'pos_data'), {
                     tablesCount,
                     menuItems,
                     users,
@@ -720,7 +684,6 @@
                     expenses,
                     purchases,
                     stockMovements,
-                    subscriptionCode,
                     lastUpdated: new Date().toISOString()
                 }).catch(err => console.error("Firebase Save Error:", err));
             }
@@ -734,13 +697,6 @@
             const user = users.find(u => u.email === email && u.pass === pass);
             
             if(user) {
-                // Check Subscription BEFORE logging in
-                const subStatus = validateSubscription(subscriptionCode);
-                if (!subStatus.valid) {
-                    document.getElementById('subscription-modal').classList.remove('hidden');
-                    return; // Stop login
-                }
-
                 currentUser = user;
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
@@ -780,75 +736,6 @@
             });
         }
 
-        // --- SUBSCRIPTION SYSTEM ---
-        function validateSubscription(code) {
-            if (!code) return { valid: false, reason: 'missing' };
-            code = code.trim();
-            if (!code.startsWith('HEKAYA-')) return { valid: false, reason: 'invalid_format' };
-
-            try {
-                const base64 = code.replace('HEKAYA-', '').replace(/\s/g, '');
-                // Handle Unicode (Arabic) characters decoding correctly
-                let jsonStr;
-                try { jsonStr = decodeURIComponent(escape(atob(base64))); } 
-                catch (e) { jsonStr = atob(base64); }
-                
-                const data = JSON.parse(jsonStr);
-                
-                if (data.secret !== 'hekaya_secure_key_2025') return { valid: false, reason: 'invalid' };
-                
-                const now = new Date().getTime();
-                if (now > data.exp) return { valid: false, reason: 'expired', exp: data.exp };
-                
-                return { valid: true, exp: data.exp, client: data.client };
-            } catch (e) {
-                return { valid: false, reason: 'error' };
-            }
-        }
-
-        function activateSystem() {
-            const code = document.getElementById('activation-code-input').value.trim();
-            const result = validateSubscription(code);
-            
-            if (result.valid) {
-                subscriptionCode = code;
-                saveData();
-                document.getElementById('subscription-modal').classList.add('hidden');
-                showNotification('تم تفعيل النظام بنجاح');
-            } else {
-                alert('كود التفعيل غير صحيح أو منتهي الصلاحية!');
-            }
-        }
-
-        function updateSubscriptionFromSettings() {
-            const code = document.getElementById('settings-sub-code').value.trim();
-            const result = validateSubscription(code);
-            if (result.valid) {
-                subscriptionCode = code;
-                saveData();
-                renderSubscriptionStatus();
-                showNotification('تم تجديد الاشتراك بنجاح');
-                document.getElementById('settings-sub-code').value = '';
-            } else {
-                showNotification('الكود غير صالح', 'error');
-            }
-        }
-
-        function renderSubscriptionStatus() {
-            const result = validateSubscription(subscriptionCode);
-            const statusText = document.getElementById('sub-status-text');
-            const expiryText = document.getElementById('sub-expiry-text');
-            
-            if (result.valid) {
-                const date = new Date(result.exp).toLocaleDateString('ar-EG');
-                statusText.innerHTML = `<span class="text-green-600"><i class="fas fa-check-circle"></i> نشط</span>`;
-                expiryText.innerText = `ينتهي في: ${date}`;
-            } else {
-                statusText.innerHTML = `<span class="text-red-600"><i class="fas fa-times-circle"></i> غير نشط / منتهي</span>`;
-                expiryText.innerText = `يرجى التجديد فوراً`;
-            }
-        }
-
         // --- INIT ---
         document.addEventListener('DOMContentLoaded', () => {
             renderMenu('all');
@@ -881,7 +768,6 @@
             if (viewName === 'admin') renderAdminTable();
             if (viewName === 'settings') {
                 document.getElementById('settings-table-count').value = tablesCount;
-                renderSubscriptionStatus();
                 renderUsersTable();
             }
         }
